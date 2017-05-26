@@ -1,0 +1,29 @@
+{
+	"MapsPy":
+	{
+		"Description":"XRF software written in Python",
+		"Module":"run_mapspy",
+		"Path":"/local/src/MapsPy/",
+		"Exe":"N/A",
+		"Version_File":"/local/src/MapsPy/Version.html",
+		"Is_Python":1
+	},
+	"XRF-Maps":
+	{
+		"Description":"XRF software written in Python",
+		"Module":"run_mapspy",
+		"Path":"/local/src/XRF-Maps/bin/",
+		"Exe":"XRF_Maps",
+		"Version_File":"/local/src/XRF-Maps/Version.html",
+		"Is_Python":0
+	},
+	"PtychoLib":
+	{
+		"Description":"Ptychography software",
+		"Module":"run_phycholib",
+		"Path":"/local/src/PtychoLib/",
+		"Exe":"ePie",
+		"Version_File":"/local/src/PtychoLib/Version.html",
+		"Is_Python":0
+	}
+}
