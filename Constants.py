@@ -38,7 +38,7 @@ JOB_STATUS_CANCELING = 3
 JOB_STATUS_CANCELED = 4
 JOB_STATUS_GENERAL_ERROR = 10
 
-# ===================================== Job Status =======================================
+# ===================================== Process Node Status =======================================
 PROCESS_NODE_STATUS_IDLE = 'Idle'
 PROCESS_NODE_STATUS_PROCESSING = 'Processing'
 PROCESS_NODE_STATUS_PROCESSING_IDL = 'Processing IDL'
@@ -110,5 +110,7 @@ DIR_IMG_DAT = 'img.dat'
 DIR_LINE_DAT = 'line.dat'
 DIR_XANES_DAT = 'xanes.dat'
 DIR_FLY_DAT = 'fly.dat'
+
 # ===================================== Sofware Names for Version Info =======================================
-XRF_SOFTWARE_NAME = 'XRF-Maps'
+SOFTWARE_MODULE = 'Module'
+SOFTWARE_MODULE_OPTIONS = 'Options'

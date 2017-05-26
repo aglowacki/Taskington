@@ -1,7 +1,8 @@
-import maps_batch
 import Constants
 import os
 import glob
+import sys
+
 
 # XRF JOB ARGS KEYS
 JOB_IS_LIVE_JOB = 'Is_Live_Job'  # INTEGER
@@ -17,7 +18,12 @@ JOB_DETECTOR_TO_START_WITH = 'DetectorToStartWith'  # INTEGER
 JOB_PROC_MASK = 'ProcMask'  # INTEGER
 
 
-def start_job(log_name, alias_path, job_dict, path, exe, exitcode):
+def start_job(log_name, alias_path, job_dict, options, exitcode):
+	#find_maps_batch()
+	if not options['Path'] in sys.path:
+		sys.path.insert(0,options['Path'])
+	import maps_batch
+	saved_cwd = os.getcwd()
 	job_args = job_dict[Constants.JOB_ARGS]
 	if job_args[JOB_IS_LIVE_JOB] == 1:
 		dataset_full_file_path = max(glob.iglob(alias_path + '/mda/*.mda'), key=os.path.getctime)
@@ -27,11 +33,12 @@ def start_job(log_name, alias_path, job_dict, path, exe, exitcode):
 	logger, fHandler = maps_batch.setup_logger('job_logs/' + log_name)
 	logger.info('Start Job Process')
 	try:
+		os.chdir(options['Path'])
 		maps_set_str = os.path.join(str(alias_path), 'maps_settings.txt')
 		f = open(maps_set_str, 'w')
 		f.write('	  This file will set some MAPS settings mostly to do with fitting' + '\n')
 		f.write('VERSION:' + str(job_dict[Constants.JOB_VERSION]).strip() + '\n')
-		f.write('DETECT{"Attachments":[{"__type":"ItemIdAttachment:#Exchange","ItemId":{"__type":"ItemId:#Exchange","Id":"AAMkADIxY2I1NTBlLWRjYTYtNDA2Ny04MGE0LTVjMWQzMjc2M2E1NQBGAAAAAACw2UktkM59Ro4KlQMqF6v9BwAMVe7nauXFSpwkI46P04tPAAAALSFeAAAEZsWcfCIvQpBqpETK7e/pAAAWEuO2AAA=","ChangeKey":null},"Name":"Integrating BlueSky at ANL","IsInline":false}]}OR_ELEMENTS:' + str(job_dict[Constants.JOB_ARGS][Constants.JOB_DETECTOR_ELEMENTS]).strip() + '\n')
+		f.write('DETECTOR_ELEMENTS:' + str(job_args[JOB_DETECTOR_ELEMENTS]).strip() + '\n')
 		f.write('MAX_NUMBER_OF_FILES_TO_PROCESS:' + str(job_args[JOB_MAX_FILES_TO_PROC]).strip() + '\n')
 		f.write('MAX_NUMBER_OF_LINES_TO_PROCESS:' + str(job_args[JOB_MAX_LINES_TO_PROC]).strip() + '\n')
 		f.write('QUICK_DIRTY:' + str(job_args[JOB_QUICK_AND_DIRTY]).strip() + '\n')
@@ -68,9 +75,11 @@ def start_job(log_name, alias_path, job_dict, path, exe, exitcode):
 		if proc_mask & 64 == 64:
 			key_g = 1
 		maps_batch.maps_batch(wdir=alias_path, option_a_roi_plus=key_a, option_b_extract_spectra=key_b, option_c_per_pixel=key_c, option_d_image_extract=key_d, option_e_exchange_format=key_e, option_g_avg_hdf=key_g, logger=logger)
+		os.chdir(saved_cwd)
 		logger.info('Completed Job')
 	except:
 		logger.exception('job process')
+		os.chdir(saved_cwd)
 		handlers = logger.handlers[:]
 		for handler in handlers:
 			handler.close()

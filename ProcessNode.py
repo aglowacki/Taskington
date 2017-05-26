@@ -30,12 +30,7 @@ IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY O
 SUCH DAMAGE.
 '''
 
-# include parent directory for imports
-import os, sys, inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0, parentdir)
-
+import os
 import Settings
 import requests
 import cherrypy
@@ -74,7 +69,7 @@ class ProcessNode(RestBase):
 					Constants.PROCESS_NODE_SYSTEM_CPU_PERCENT: 0.0,
 					Constants.PROCESS_NODE_SYSTEM_MEM_PERCENT: 0.0,
 					Constants.PROCESS_NODE_SYSTEM_SWAP_PERCENT: 0.0,
-					Constants.PROCESS_NODE_SUPPORTED_SOFTWARE: pnSettings[Settings.PROCESS_NODE_SOFTWARE_LIST]
+					Constants.PROCESS_NODE_SUPPORTED_SOFTWARE: []
 					}
 		cherrypy.config.update({
 			'server.socket_host': serverSettings[Settings.SERVER_HOSTNAME],
@@ -119,8 +114,6 @@ class ProcessNode(RestBase):
 		self.scheduler_port = serverSettings[Settings.SERVER_SCHEDULER_PORT]
 		self.software_dict = self.parse_json_file(pnSettings[Settings.PROCESS_NODE_SOFTWARE_LIST])
 		self.path_alias_dict = self.parse_json_file(pnSettings[Settings.PROCESS_NODE_PATH_ALIAS])
-		#self.xrf_maps_path = pnSettings[Settings.PROCESS_NODE_XRF_MAPS_PATH]
-		#self.xrf_maps_exe = pnSettings[Settings.PROCESS_NODE_XRF_MAPS_EXE]
 		self.logger.info('alias paths %s', self.path_alias_dict)
 		self.session = requests.Session()
 		self.scheduler_pn_url = 'http://' + self.scheduler_host + ':' + self.scheduler_port + '/process_node'
@@ -131,6 +124,8 @@ class ProcessNode(RestBase):
 		cherrypy.engine.subscribe("update_id", self.callback_update_id)
 		cherrypy.engine.subscribe("delete_job", self.callback_delete_job)
 		cherrypy.engine.subscribe("send_job_update", self.callback_send_job_update)
+		for item in self.software_dict.keys():
+			self.pn_info[Constants.PROCESS_NODE_SUPPORTED_SOFTWARE] += [item]
 		self.create_directories()
 		self.running = True
 		self.status_thread = None
@@ -275,9 +270,9 @@ class ProcessNode(RestBase):
 				self.send_status_update()
 
 				if job_dict[Constants.JOB_EXPERIMENT] in self.software_dict:
-					prog = self.software_dict[job_dict[Constants.JOB_EXPERIMENT]]
-					method = getattr(modules, prog['module'])
-					proc = multiprocessing.Process(target=method.start_job, args=(log_name, alias_path, job_dict, prog['path'], prog['exe'], exitcode))
+					program = self.software_dict[job_dict[Constants.JOB_EXPERIMENT]]
+					method = getattr(modules, program[Constants.SOFTWARE_MODULE])
+					proc = multiprocessing.Process(target=method.start_job, args=(log_name, alias_path, job_dict, program[Constants.SOFTWARE_MODULE_OPTIONS], exitcode))
 				if not proc == None:
 					proc.start()
 					self.this_process = psutil.Process(proc.pid)

@@ -189,6 +189,8 @@ class SQLiteDB:
 		cur.execute(sql_statement)
 		con.commit()
 		row = cur.fetchone()
+		if type(proc_node_dict[Constants.PROCESS_NODE_SUPPORTED_SOFTWARE]) == type([]):
+			proc_node_dict[Constants.PROCESS_NODE_SUPPORTED_SOFTWARE] = json.dumps(proc_node_dict[Constants.PROCESS_NODE_SUPPORTED_SOFTWARE])
 		if row[0] == 0:
 			print 'insert',proc_node_dict
 			insert_str = Gen_Insert_Into_Table(TABLES[Constants.TABLE_PROCESS_NODES], proc_node_dict)
@@ -254,6 +256,8 @@ class SQLiteDB:
 				#a = jdec.decode(row[Constants.JOB_ARGS])
 				#a = json.loads(row[Constants.JOB_ARGS])
 				row[Constants.JOB_ARGS] = json.loads(row[Constants.JOB_ARGS])
+			if table['Name'] == Constants.TABLE_PROCESS_NODES:
+				row[Constants.PROCESS_NODE_SUPPORTED_SOFTWARE] = json.loads(row[Constants.PROCESS_NODE_SUPPORTED_SOFTWARE])
 			ret_list += [row]
 		return ret_list
 

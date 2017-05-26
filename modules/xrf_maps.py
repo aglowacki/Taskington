@@ -20,12 +20,14 @@ JOB_PROC_MASK = 'ProcMask'  # INTEGER
 
 
 
-def start_job(log_name, alias_path, job_dict, xrf_maps_path, xrf_maps_exe, exitcode):
+def start_job(log_name, alias_path, job_dict, options, exitcode):
 	job_args = job_dict[Constants.JOB_ARGS]
 	if job_args[JOB_IS_LIVE_JOB] == 1:
 		dataset_full_file_path = max(glob.iglob(alias_path + '/mda/*.mda'), key=os.path.getctime)
 		job_dict[Constants.JOB_DATASET_FILES_TO_PROC] = os.path.basename(dataset_full_file_path)
 	try:
+		xrf_maps_path = options['Path']
+		xrf_maps_exe = options['Exe']
 		args = [xrf_maps_exe]
 		args += ['--dir', alias_path]
 		if str(job_args[JOB_NNLS]).strip() == '1':

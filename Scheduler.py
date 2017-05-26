@@ -133,7 +133,8 @@ class Scheduler(RestBase):
 			p_node = None
 			if job[Constants.JOB_PROCESS_NODE_ID] > -1:
 				p_node = db.get_process_node_by_id(int(job[Constants.JOB_PROCESS_NODE_ID]))
-				self.send_job_to_process_node(job, p_node)
+				if job[Constants.JOB_EXPERIMENT] in p_node[Constants.PROCESS_NODE_SUPPORTED_SOFTWARE]:
+					self.send_job_to_process_node(job, p_node)
 			else:
 				node_list = db.get_all_process_nodes()
 				self.logger.info('searching for idle node')
@@ -141,13 +142,14 @@ class Scheduler(RestBase):
 					if node[Constants.PROCESS_NODE_STATUS] == Constants.PROCESS_NODE_STATUS_IDLE:
 						p_node = node
 						if p_node != None:
-							job[Constants.JOB_PROCESS_NODE_ID] = p_node[Constants.PROCESS_NODE_ID]
-							r = self.send_job_to_process_node(job, p_node)
-							if r.status_code == 200:
-								db.update_job_pn(job[Constants.JOB_ID], p_node[Constants.PROCESS_NODE_ID])
-								break
-							else:
-								job[Constants.JOB_PROCESS_NODE_ID] = -1
+							if job[Constants.JOB_EXPERIMENT] in p_node[Constants.PROCESS_NODE_SUPPORTED_SOFTWARE]:
+								job[Constants.JOB_PROCESS_NODE_ID] = p_node[Constants.PROCESS_NODE_ID]
+								r = self.send_job_to_process_node(job, p_node)
+								if r.status_code == 200:
+									db.update_job_pn(job[Constants.JOB_ID], p_node[Constants.PROCESS_NODE_ID])
+									break
+								else:
+									job[Constants.JOB_PROCESS_NODE_ID] = -1
 			self.job_lock.release()
 		except:
 			self.job_lock.release()
@@ -225,12 +227,15 @@ class Scheduler(RestBase):
 				job_list = db.get_all_unprocessed_jobs_for_pn_id(int(node[Constants.PROCESS_NODE_ID]))
 				if len(job_list) < 1:
 					job_list = db.get_all_unprocessed_jobs_for_any_node()
-				if len(job_list) > 0:
-					job = job_list[0]
-					job[Constants.JOB_PROCESS_NODE_ID] = node[Constants.PROCESS_NODE_ID]
-					r = self.send_job_to_process_node(job, node)
-					if r.status_code == 200:
-						db.update_job_pn(job[Constants.JOB_ID], node[Constants.PROCESS_NODE_ID])
+				#if len(job_list) > 0:
+				for job in job_list:
+					#job = job_list[0]
+					if job[Constants.JOB_EXPERIMENT] in node[Constants.PROCESS_NODE_SUPPORTED_SOFTWARE]:
+						job[Constants.JOB_PROCESS_NODE_ID] = node[Constants.PROCESS_NODE_ID]
+						r = self.send_job_to_process_node(job, node)
+						if r.status_code == 200:
+							db.update_job_pn(job[Constants.JOB_ID], node[Constants.PROCESS_NODE_ID])
+							break
 				self.job_lock.release()
 			db.insert_process_node(node)
 		except:
