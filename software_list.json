@@ -4,6 +4,7 @@
 		"Description":"XRF software written in Python",
 		"Version_File":"/local/src/MapsPy/Version.html",
 		"Module":"mapspy",
+		"Num_Simultaneous_Jobs":1,
 		"Options":
 		{
 			"Path":""
@@ -14,6 +15,7 @@
 		"Description":"XRF software written in Python",
 		"Version_File":"/local/src/XRF-Maps/Version.html",
 		"Module":"xrf_maps",
+		"Num_Simultaneous_Jobs":1,
 		"Options":
 		{
 			"Path":"",
@@ -24,7 +26,8 @@
 	{
 		"Description":"Ptychography software",
 		"Version_File":"/local/src/PtychoLib/Version.html",
-		"Module":"phycholib",
+		"Module":"ptycholib",
+		"Num_Simultaneous_Jobs":6,
 		"Options":
 		{
 			"Path":"",

@@ -18,6 +18,22 @@ JOB_DETECTOR_TO_START_WITH = 'DetectorToStartWith'  # INTEGER
 JOB_PROC_MASK = 'ProcMask'  # INTEGER
 
 
+def gen_args_dict():
+	return {
+		JOB_IS_LIVE_JOB:0,
+		JOB_STANDARDS:'maps_standardinfo.txt',
+		JOB_DETECTOR_ELEMENTS:4,
+		JOB_MAX_FILES_TO_PROC:1,
+		JOB_MAX_LINES_TO_PROC:-1,
+		JOB_QUICK_AND_DIRTY:0,
+		JOB_XRF_BIN:0,
+		JOB_NNLS:0,
+		JOB_XANES_SCAN:0,
+		JOB_DETECTOR_TO_START_WITH:0,
+		JOB_PROC_MASK:0
+	}
+
+
 def start_job(log_name, alias_path, job_dict, options, exitcode):
 	#find_maps_batch()
 	if not options['Path'] in sys.path:

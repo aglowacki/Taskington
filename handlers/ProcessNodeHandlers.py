@@ -35,6 +35,8 @@ import cherrypy
 import traceback
 import os
 import re
+import modules
+import Constants
 
 #todo: this is redefined in ProcessNode.py 
 STR_JOB_LOG_DIR_NAME = 'job_logs'
@@ -67,6 +69,11 @@ class ProcessNodeHandler(object):
 			return exc_str
 
 	@cherrypy.expose
+	def get_supported_software(self):
+		jenc = json.JSONEncoder()
+		return jenc.encode(self.software_dict.keys())
+
+	@cherrypy.expose
 	def version(self, software):
 		if self.software_dict.has_key(software):
 			ver = [re.findall(r'<b>Revision<\/b>:\s*([^\n\r]*)', line) for line in open(self.software_dict[software]['Version_File'])]
@@ -93,6 +100,20 @@ class ProcessNodeHandler(object):
 	def update_id(self, Id):
 		cherrypy.engine.publish('update_id', Id)
 		return 'Updated'
+
+	@cherrypy.expose
+	def gen_job_args(self, experiment_name):
+		args_dict = {}
+		try:
+			if experiment_name in self.software_dict:
+				program = self.software_dict[experiment_name]
+				method = getattr(modules, program[Constants.SOFTWARE_MODULE])
+				args_dict = method.gen_args_dict()
+		except:
+			exc_str = traceback.format_exc()
+			return exc_str
+		jenc = json.JSONEncoder()
+		return jenc.encode(args_dict)
 
 
 class ProcessNodeJobsWebService(object):

@@ -62,6 +62,9 @@ class DatabasePlugin(plugins.SimplePlugin):
 	def insert_job(self, job_dict):
 		return self.db.insert_job(job_dict)
 
+	def gen_job_dict(self):
+		return self.db.gen_job_dict()
+
 	def get_all_process_nodes(self):
 		return self.db.get_all_process_nodes()
 

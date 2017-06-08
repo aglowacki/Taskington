@@ -41,6 +41,7 @@ import threading
 import signal
 import psutil
 import multiprocessing
+import traceback
 from datetime import datetime
 from RestBase import RestBase
 from plugins.DatabasePlugin import DatabasePlugin
@@ -337,6 +338,8 @@ class ProcessNode(RestBase):
 			self.pn_info[Constants.PROCESS_NODE_HEARTBEAT] = str(datetime.now())
 			self.session.put(self.scheduler_pn_url, data=json.dumps(self.pn_info))
 		except:
+			#exc_str = traceback.format_exc()
+			#print exc_str
 			self.logger.error('Error sending status update')
 
 	def send_job_update(self, job_dict):
@@ -344,22 +347,7 @@ class ProcessNode(RestBase):
 			self.session.put(self.scheduler_job_url, params=self.pn_info, data=json.dumps(job_dict))
 			self.logger.info('sent job status %s', job_dict)
 		except:
+			exc_str = traceback.format_exc()
+			print exc_str
 			self.logger.exception('Error sending job update')
 
-'''
-def call_software(log_name, alias_path, job_dict, software_path, software_exe, exitcode):
-	try:
-		log_file = open('job_logs/' + log_name, 'w')
-		args = [software_exe]
-		args += [job_dict[Constants.JOB_ARGS]]
-		if os.name == "nt":
-			exitcode = subprocess.call(args, cwd=software_path, stdout=log_file, stderr=log_file, shell=True)
-		else:
-			exitcode = subprocess.call(args, cwd=software_path, stdout=log_file, stderr=log_file, shell=False)
-		print 'exitcode = ', exitcode
-		log_file.close()
-	except:
-		exc_str = traceback.format_exc()
-		print exc_str
-		exitcode = -1
-'''

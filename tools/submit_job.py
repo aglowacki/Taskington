@@ -2,7 +2,7 @@ import sys
 import requests
 import json
 
-xfm0_url = ''
+xfm0_url = 'http://server:8080'
 
 
 def call_post(s, url, payload):
@@ -19,24 +19,18 @@ def call_get(s, url):
 	r = s.get(url)
 	print r.status_code, '::', r.text
 
-def gen_job_template():
-	job = {	'Experiment': '',
-			'DataPath': '',
-			'Version': '1.00',
-			'BeamLine': 'a',
-			'DatasetFilesToProc': 'all',
-			'Priority': 5,
-			'Status': 0,
-			'StartProcTime': 0,
-			'FinishProcTime': 0,
-			'Log_Path': '',
-			'Process_Node_Id': -1,
-			'Emails': '',
-			'Args': {}
-			}
-	return job
+def get_proc_nodes(s, url):
+	return s.get(url + '/process_node')
 
-def gen_mapspy_job(DataPath, proc_options, proc_per_line=11, proc_per_file=2, detector_elements=4, dataset_filenames='all', detector_to_start_with=0, pn_id =-1, priority=5, is_live_job=0, quickNdirty=0, nnls=0, xanes=0, xrfbin=0, emails=''):
+def get_job_template(s, url, experiment_name):
+	result = s.get(url + '/get_job_dict?experiment_name=' + experiment_name)
+	if result.status_code == 200:
+		return json.loads(result.text)
+	else:
+		print 'Error getting job dictionary'
+		return {}
+
+def update_mapspy_job(job_dict, DataPath, proc_options, proc_per_line=11, proc_per_file=2, detector_elements=4, dataset_filenames='all', detector_to_start_with=0, pn_id =-1, priority=5, is_live_job=0, quickNdirty=0, nnls=0, xanes=0, xrfbin=0, emails=''):
 	analysis_type_a = int(proc_options[0])
 	analysis_type_b = int(proc_options[1])
 	analysis_type_c = int(proc_options[2])
@@ -57,14 +51,12 @@ def gen_mapspy_job(DataPath, proc_options, proc_per_line=11, proc_per_file=2, de
 	if analysis_type_f > 0:
 		procMask += 32
 
-	job = gen_job_template()
-	job['Experiment'] = 'MapsPy'
-	job['BeamLine'] = '2-ID-E'
-	job['DataPath'] = DataPath
-	job['Version'] = '9.00'
-	job['Emails'] = emails
-	job['DatasetFilesToProc'] = dataset_filenames
-	job['Args'] = {
+	job_dict['BeamLine'] = '2-ID-E'
+	job_dict['DataPath'] = DataPath
+	job_dict['Version'] = '9.00'
+	job_dict['Emails'] = emails
+	job_dict['DatasetFilesToProc'] = dataset_filenames
+	job_dict['Args'] = {
 					'ProcMask': procMask,
 					'Standards': 'maps_standardinfo.txt',
 					'DetectorToStartWith': 0,
@@ -78,21 +70,24 @@ def gen_mapspy_job(DataPath, proc_options, proc_per_line=11, proc_per_file=2, de
 					'Is_Live_Job': is_live_job,
 					}
 
-	return job
-
-
 
 if __name__ == '__main__':
-	if len(sys.argv) < 3:
+	#if len(sys.argv) < 3:
 		# 1 or 0 for a - f options
-		print 'python submit_job.py job_path <a,b,c,d,e,f> '
-		sys.exit(1)
-	job_path = sys.argv[1]
-	proc_options = sys.argv[2].split(',')
-	print job_path, proc_options
-	url = xfm0_url + '/job'
-	payload = gen_mapspy_job(DataPath=job_path, proc_options=proc_options)
+	#	print 'python submit_job.py job_path <a,b,c,d,e,f> '
+	#	sys.exit(1)
 	session = requests.Session()
-	print payload
-	call_post(session, url, payload)
+	#job_path = sys.argv[1]
+	#proc_options = sys.argv[2].split(',')
+	#print job_path, proc_options
+	url = xfm0_url + '/job'
+	job_dict = get_job_template(session, xfm0_url, 'MapsPy')
+	#update_mapspy_job(job_dict, DataPath=job_path, proc_options=proc_options)
+	for key,val in job_dict.iteritems():
+		print key, val
+	#print job_dict
+	#call_post(session, url, job_dict)
+	print ' '
+	#job_dict = get_job_template(session, xfm0_url, 'PtychoLib')
+	#print job_dict
 

@@ -88,6 +88,25 @@ def calc_stxm_dpc(file_path, scanDimY, scanDimX, log_file, fs=1):
 	return stxm_dpc
 
 
+def gen_args_dict():
+	return {
+		STR_AlgorithmEPIE:1,
+		STR_AlgorithmDM:0,
+		STR_CenterY:0,
+		STR_CenterX:0,
+		STR_ProbeModes:5,
+		STR_Iterations:200,
+		STR_Rotation:1,
+		STR_Threshold:1,
+		STR_ProbeSize:1,
+		STR_PixelSize:172,
+		STR_DiffractionSize: 128,
+		STR_DetectorDistance: 1.2,
+		STR_GPU_ID:0,
+		STR_CalcSTXM:1
+	}
+
+
 def start_job(log_name, alias_path, job_dict, options, exitcode):
 	job_args = job_dict[Constants.JOB_ARGS]
 	try:
@@ -181,20 +200,7 @@ if __name__ == '__main__':
 	log_name = 'test_ptycholib_module.log'
 	alias_path = '/data/ptycho_apr17/'
 	job_dict = {Constants.JOB_DATASET_FILES_TO_PROC: 'all',
-				Constants.JOB_ARGS: {STR_CenterY:0,
-									 STR_CenterX:0,
-									 STR_ProbeModes:5,
-									 STR_Iterations:200,
-									 STR_Rotation:1,
-									 STR_Threshold:1,
-									 STR_ProbeSize:1,
-									 STR_PixelSize:172,
-									 STR_DetectorDistance:1.0,
-									 STR_DiffractionSize: 128,
-									 STR_DetectorDistance: 1.2,
-									 STR_GPU_ID:0,
-									 STR_CalcSTXM:1
-									 }
+				Constants.JOB_ARGS: gen_args_dict()
 				}
 	options = {'Path': '/bin/',
 			   'Exe': 'ls'}

@@ -38,7 +38,10 @@ import os
 import base64
 import Settings
 import unicodedata
+import requests
 import Constants
+import traceback
+
 
 def gen_job_dir_dict(text, opened, children):
 	d_dict = dict()
@@ -296,6 +299,43 @@ class SchedulerHandler(object):
 		jenc = json.JSONEncoder()
 		return jenc.encode(data_dict)
 
+	@cherrypy.expose
+	def get_job_dict(self, experiment_name):
+		proc_nodes = self.db.get_all_process_nodes()
+		for proc_node in proc_nodes:
+			if experiment_name in proc_node[Constants.PROCESS_NODE_SUPPORTED_SOFTWARE] and not proc_node[Constants.PROCESS_NODE_STATUS] == Constants.PROCESS_NODE_STATUS_OFFLINE:
+				job_dict = self.db.gen_job_dict()
+				job_dict[Constants.JOB_EXPERIMENT] = experiment_name
+				url = 'http://' + proc_node[Constants.PROCESS_NODE_HOSTNAME] + ':' + str(proc_node[Constants.PROCESS_NODE_PORT]) + '/gen_job_args?experiment_name=' + experiment_name
+				result = requests.get(url)
+				if result.status_code == 200:
+					job_dict[Constants.JOB_ARGS] = json.loads(result.text)
+				jenc = json.JSONEncoder()
+				return jenc.encode(job_dict)
+		#  could not find so try to import local modules
+		#try:
+		#	program = self.software_dict[experiment_name]
+		#	method = getattr(modules, program[Constants.SOFTWARE_MODULE])
+		#	args_dict = method.gen_args_dict()
+		#except:
+		#	exc_str = traceback.format_exc()
+		#	return exc_str
+		return 'Error'
+
+	@cherrypy.expose
+	def get_supported_software(self):
+		proc_nodes = self.db.get_all_process_nodes()
+		jenc = json.JSONEncoder()
+		sup_software = {}
+		for proc_node in proc_nodes:
+			if not proc_node[Constants.PROCESS_NODE_STATUS] == Constants.PROCESS_NODE_STATUS_OFFLINE:
+				url = 'http://' + proc_node[Constants.PROCESS_NODE_HOSTNAME] + ':' + str(proc_node[Constants.PROCESS_NODE_PORT]) + '/get_supported_software'
+				result = requests.get(url)
+				if result.status_code == 200:
+					sup_software[proc_node[Constants.PROCESS_NODE_COMPUTERNAME]] = json.loads(result.text)
+		return jenc.encode(sup_software)
+
+
 class SchedulerJobsWebService(object):
 	'''
 	Scheduler exposed /job
@@ -383,13 +423,17 @@ class SchedulerProcessNodeWebService(object):
 
 	# change process node status
 	def PUT(self):
-		cl = cherrypy.request.headers['Content-Length']
-		rawbody = cherrypy.request.body.read(int(cl))
-		proc_node = json.loads(rawbody)
-		#print proc_node
-		#self.db.insert_process_node(proc_node)
-		cherrypy.engine.publish('process_node_update', proc_node)
-		return 'updated process node'
+		try:
+			cl = cherrypy.request.headers['Content-Length']
+			rawbody = cherrypy.request.body.read(int(cl))
+			proc_node = json.loads(rawbody)
+			#print proc_node
+			#self.db.insert_process_node(proc_node)
+			cherrypy.engine.publish('process_node_update', proc_node)
+			return 'updated process node'
+		except:
+			exc_str = traceback.format_exc()
+			return exc_str
 
 	# computer node went offline, remove from list
 	def DELETE(self):

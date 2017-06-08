@@ -52,38 +52,45 @@ SQL_WHERE_JOB_STATUS_NEW_OR_PROCESSING = ' WHERE ' + Constants.TABLE_JOBS + '.' 
 SQL_WHERE_UNPROCESSED_AND_PROCESSING_JOBS = SQL_WHERE_JOB_STATUS_NEW_OR_PROCESSING + SQL_ORDER_BY_JOB_STATUS_DESC
 
 TABLES = { Constants.TABLE_PROCESS_NODES:{ 'Name':Constants.TABLE_PROCESS_NODES,
-										   'Columns':[ {'Key':Constants.PROCESS_NODE_ID, 'Type':'INTEGER', 'Prop':'PRIMARY KEY'},
-													  {'Key':Constants.PROCESS_NODE_COMPUTERNAME, 'Type':'TEXT', 'Prop':''},
-													  {'Key':Constants.PROCESS_NODE_NUM_THREADS, 'Type':'INTEGER', 'Prop':''},
-													  {'Key':Constants.PROCESS_NODE_HOSTNAME, 'Type':'TEXT', 'Prop':''},
-													  {'Key':Constants.PROCESS_NODE_PORT, 'Type':'INTEGER', 'Prop':''},
-													  {'Key':Constants.PROCESS_NODE_STATUS, 'Type':'TEXT', 'Prop':''},
-													  {'Key':Constants.PROCESS_NODE_HEARTBEAT, 'Type':'TIMESTAMP', 'Prop':''},
-													  {'Key':Constants.PROCESS_NODE_PROCESS_CPU_PERCENT, 'Type':'REAL', 'Prop':''},
-													  {'Key':Constants.PROCESS_NODE_PROCESS_MEM_PERCENT, 'Type':'REAL', 'Prop':''},
-													  {'Key':Constants.PROCESS_NODE_SYSTEM_CPU_PERCENT, 'Type':'REAL', 'Prop':''},
-													  {'Key':Constants.PROCESS_NODE_SYSTEM_MEM_PERCENT, 'Type':'REAL', 'Prop':''},
-													  {'Key':Constants.PROCESS_NODE_SYSTEM_SWAP_PERCENT, 'Type':'REAL', 'Prop':''},
-													  {'Key':Constants.PROCESS_NODE_SUPPORTED_SOFTWARE, 'Type':'TEXT', 'Prop':''},
+										   'Columns':[ {'Key':Constants.PROCESS_NODE_ID, 'Type':'INTEGER', 'Prop':'PRIMARY KEY', 'Default_Value':-1},
+													  {'Key':Constants.PROCESS_NODE_COMPUTERNAME, 'Type':'TEXT', 'Prop':'', 'Default_Value':''},
+													  {'Key':Constants.PROCESS_NODE_NUM_THREADS, 'Type':'INTEGER', 'Prop':'', 'Default_Value':1},
+													  {'Key':Constants.PROCESS_NODE_HOSTNAME, 'Type':'TEXT', 'Prop':'', 'Default_Value':''},
+													  {'Key':Constants.PROCESS_NODE_PORT, 'Type':'INTEGER', 'Prop':'', 'Default_Value':-1},
+													  {'Key':Constants.PROCESS_NODE_STATUS, 'Type':'TEXT', 'Prop':'', 'Default_Value':''},
+													  {'Key':Constants.PROCESS_NODE_HEARTBEAT, 'Type':'TIMESTAMP', 'Prop':'', 'Default_Value':0},
+													  {'Key':Constants.PROCESS_NODE_PROCESS_CPU_PERCENT, 'Type':'REAL', 'Prop':'', 'Default_Value':0.0},
+													  {'Key':Constants.PROCESS_NODE_PROCESS_MEM_PERCENT, 'Type':'REAL', 'Prop':'', 'Default_Value':0.0},
+													  {'Key':Constants.PROCESS_NODE_SYSTEM_CPU_PERCENT, 'Type':'REAL', 'Prop':'', 'Default_Value':0.0},
+													  {'Key':Constants.PROCESS_NODE_SYSTEM_MEM_PERCENT, 'Type':'REAL', 'Prop':'', 'Default_Value':0.0},
+													  {'Key':Constants.PROCESS_NODE_SYSTEM_SWAP_PERCENT, 'Type':'REAL', 'Prop':'', 'Default_Value':0.0},
+													  {'Key':Constants.PROCESS_NODE_SUPPORTED_SOFTWARE, 'Type':'TEXT', 'Prop':'', 'Default_Value':''},
 													   ]
 		   								},
 			Constants.TABLE_JOBS:{ 'Name':Constants.TABLE_JOBS,
-									'Columns':[ {'Key':Constants.JOB_ID, 'Type':'INTEGER', 'Prop':'PRIMARY KEY'},
-									  {'Key':Constants.JOB_EXPERIMENT, 'Type':'TEXT', 'Prop':''},
-									  {'Key':Constants.JOB_DATA_PATH, 'Type':'TEXT', 'Prop':''},
-									  {'Key':Constants.JOB_VERSION, 'Type':'TEXT', 'Prop':''},
-									  {'Key':Constants.JOB_BEAM_LINE, 'Type':'TEXT', 'Prop':''},
-									  {'Key':Constants.JOB_DATASET_FILES_TO_PROC, 'Type':'TEXT', 'Prop':''},
-									  {'Key':Constants.JOB_PRIORITY, 'Type':'INTEGER', 'Prop':''},
-									  {'Key':Constants.JOB_STATUS, 'Type':'INTEGER', 'Prop':''},
-									  {'Key':Constants.JOB_START_PROC_TIME, 'Type':'TIMESTAMP', 'Prop':''},
-									  {'Key':Constants.JOB_FINISH_PROC_TIME, 'Type':'TIMESTAMP', 'Prop':''},
-									  {'Key':Constants.JOB_LOG_PATH, 'Type':'TEXT', 'Prop':''},
-									  {'Key':Constants.JOB_PROCESS_NODE_ID, 'Type':'INTEGER', 'Prop':''},
-									  {'Key':Constants.JOB_EMAILS, 'Type':'TEXT', 'Prop':''},
-									  {'Key':Constants.JOB_ARGS, 'Type':'TEXT', 'Prop':''} ]
+									'Columns':[ {'Key':Constants.JOB_ID, 'Type':'INTEGER', 'Prop':'PRIMARY KEY', 'Default_Value':-1},
+									  {'Key':Constants.JOB_EXPERIMENT, 'Type':'TEXT', 'Prop':'', 'Default_Value':''},
+									  {'Key':Constants.JOB_DATA_PATH, 'Type':'TEXT', 'Prop':'', 'Default_Value':''},
+									  {'Key':Constants.JOB_VERSION, 'Type':'TEXT', 'Prop':'', 'Default_Value':''},
+									  {'Key':Constants.JOB_BEAM_LINE, 'Type':'TEXT', 'Prop':'', 'Default_Value':''},
+									  {'Key':Constants.JOB_DATASET_FILES_TO_PROC, 'Type':'TEXT', 'Prop':'', 'Default_Value':''},
+									  {'Key':Constants.JOB_PRIORITY, 'Type':'INTEGER', 'Prop':'', 'Default_Value':5},
+									  {'Key':Constants.JOB_STATUS, 'Type':'INTEGER', 'Prop':'', 'Default_Value':0},
+									  {'Key':Constants.JOB_START_PROC_TIME, 'Type':'TIMESTAMP', 'Prop':'', 'Default_Value':0},
+									  {'Key':Constants.JOB_FINISH_PROC_TIME, 'Type':'TIMESTAMP', 'Prop':'', 'Default_Value':0},
+									  {'Key':Constants.JOB_LOG_PATH, 'Type':'TEXT', 'Prop':'', 'Default_Value':''},
+									  {'Key':Constants.JOB_PROCESS_NODE_ID, 'Type':'INTEGER', 'Prop':'', 'Default_Value':-1},
+									  {'Key':Constants.JOB_EMAILS, 'Type':'TEXT', 'Prop':'', 'Default_Value':''},
+									  {'Key':Constants.JOB_ARGS, 'Type':'TEXT', 'Prop':'', 'Default_Value':'' } ]
 								   }
 		   }
+
+
+def Gen_Dict(table):
+	ret_dict = {}
+	for col in table['Columns']:
+		ret_dict[col['Key']] = col['Default_Value']
+	return ret_dict
 
 
 def Gen_Create_Table(table):
@@ -215,6 +222,9 @@ class SQLiteDB:
 		cur.execute(sql_statement)
 		con.commit()
 		return cur.lastrowid
+
+	def gen_job_dict(self):
+		return Gen_Dict(TABLES[Constants.TABLE_JOBS])
 
 	def get_process_node_by_name(self, proc_node_name):
 		where_statement = ' WHERE ' + Constants.PROCESS_NODE_COMPUTERNAME + '="' + proc_node_name + '"'
