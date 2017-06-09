@@ -310,6 +310,9 @@ class SchedulerHandler(object):
 				result = requests.get(url)
 				if result.status_code == 200:
 					job_dict[Constants.JOB_ARGS] = json.loads(result.text)
+				#  remove job_id so it will be assigned a new one instead of -1
+				if job_dict.has_key(Constants.JOB_ID):
+					job_dict.pop(Constants.JOB_ID)
 				jenc = json.JSONEncoder()
 				return jenc.encode(job_dict)
 		#  could not find so try to import local modules

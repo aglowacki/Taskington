@@ -155,6 +155,7 @@ class ProcessNode(RestBase):
 
 	def callback_delete_job(self, job):
 		try:
+			#if job[Constants.JOB_ID] == self.jo
 			job[Constants.JOB_STATUS] = Constants.JOB_STATUS_CANCELED
 			#self.db.update_job(job)
 			self.db.delete_job_by_id(job[Constants.JOB_ID])

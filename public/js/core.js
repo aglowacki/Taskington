@@ -101,9 +101,9 @@
                     $str += '(G) Generate average .h5 from each detector :: ';
                 }
             }
-            else if (aData.Experiment === 'PTY')
+            else
             {
-                $str = "PtychoLib";
+                $str = aData.Experiment;
             }
             return $str;
         }

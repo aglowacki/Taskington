@@ -81,12 +81,14 @@ if __name__ == '__main__':
 	#proc_options = sys.argv[2].split(',')
 	#print job_path, proc_options
 	url = xfm0_url + '/job'
-	job_dict = get_job_template(session, xfm0_url, 'MapsPy')
+	job_dict = get_job_template(session, xfm0_url, 'Jupyter')
+	job_dict['Args']['Copy_Default_Notebooks'] = 1
+	job_dict['DataPath'] = '/data/Bayer'
 	#update_mapspy_job(job_dict, DataPath=job_path, proc_options=proc_options)
 	for key,val in job_dict.iteritems():
 		print key, val
 	#print job_dict
-	#call_post(session, url, job_dict)
+	call_post(session, url, job_dict)
 	print ' '
 	#job_dict = get_job_template(session, xfm0_url, 'PtychoLib')
 	#print job_dict
