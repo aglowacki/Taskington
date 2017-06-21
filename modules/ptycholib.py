@@ -107,6 +107,10 @@ def gen_args_dict():
 	}
 
 
+def gen_email_attachments(job_dict):
+	return " "
+
+
 def start_job(log_name, alias_path, job_dict, options, exitcode):
 	job_args = job_dict[Constants.JOB_ARGS]
 	try:

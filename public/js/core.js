@@ -402,6 +402,7 @@
                     'Emails': $("#option-emails").val(),
                     'Process_Node_Id': parseInt($pn_id, 10),
                     'DatasetFilesToProc': $dataset_filenames,
+                    'IsConcurrent': 1,
                     'Args': {
                         'ProcMask': $procMask,
                         'Standards': 'maps_standardinfo.txt', //$("#option-standard").val(),
@@ -483,6 +484,7 @@
                     'Emails': $("#pty-option-emails").val(),
                     'Process_Node_Id': $node_id,
                     'DatasetFilesToProc': $dataset_filenames,
+                    'IsConcurrent': 1,
                     'Args': {
                         'CalcSTXM': $calc_stxm,
                         'AlgorithmEPIE': $alg_epie,

@@ -64,7 +64,7 @@ TABLES = { Constants.TABLE_PROCESS_NODES:{ 'Name':Constants.TABLE_PROCESS_NODES,
 													  {'Key':Constants.PROCESS_NODE_SYSTEM_CPU_PERCENT, 'Type':'REAL', 'Prop':'', 'Default_Value':0.0},
 													  {'Key':Constants.PROCESS_NODE_SYSTEM_MEM_PERCENT, 'Type':'REAL', 'Prop':'', 'Default_Value':0.0},
 													  {'Key':Constants.PROCESS_NODE_SYSTEM_SWAP_PERCENT, 'Type':'REAL', 'Prop':'', 'Default_Value':0.0},
-													  {'Key':Constants.PROCESS_NODE_SUPPORTED_SOFTWARE, 'Type':'TEXT', 'Prop':'', 'Default_Value':''},
+													  {'Key':Constants.PROCESS_NODE_SUPPORTED_SOFTWARE, 'Type':'TEXT', 'Prop':'', 'Default_Value':''}
 													   ]
 		   								},
 			Constants.TABLE_JOBS:{ 'Name':Constants.TABLE_JOBS,
@@ -81,7 +81,9 @@ TABLES = { Constants.TABLE_PROCESS_NODES:{ 'Name':Constants.TABLE_PROCESS_NODES,
 									  {'Key':Constants.JOB_LOG_PATH, 'Type':'TEXT', 'Prop':'', 'Default_Value':''},
 									  {'Key':Constants.JOB_PROCESS_NODE_ID, 'Type':'INTEGER', 'Prop':'', 'Default_Value':-1},
 									  {'Key':Constants.JOB_EMAILS, 'Type':'TEXT', 'Prop':'', 'Default_Value':''},
-									  {'Key':Constants.JOB_ARGS, 'Type':'TEXT', 'Prop':'', 'Default_Value':'' } ]
+									  {'Key':Constants.JOB_ARGS, 'Type':'TEXT', 'Prop':'', 'Default_Value':'' },
+									  {'Key':Constants.JOB_IS_CONCURRENT, 'Type':'INTEGER', 'Prop':'', 'Default_Value':0 }
+										]
 								   }
 		   }
 
@@ -117,6 +119,8 @@ def Gen_Insert_Into_Table(table, insert_dict):
 	for col in table['Columns']:
 		if insert_dict.has_key(col['Key']):
 			ret_str += col['Key'] + ', '
+			if insert_dict[col['Key']] == None:
+				insert_dict[col['Key']] = col['Default_Value']
 			if col['Type'] == 'TEXT' or col['Type'] == 'TIMESTAMP':
 				values_str += "'" + str(insert_dict[col['Key']]) + "', "
 			else:
@@ -242,6 +246,14 @@ class SQLiteDB:
 
 	def get_all_process_nodes(self):
 		return self._get_where(TABLES[Constants.TABLE_PROCESS_NODES], ' ')
+
+	def get_all_processing_process_nodes(self):
+		where_statement = ' WHERE ' +  Constants.PROCESS_NODE_STATUS + '="' + Constants.PROCESS_NODE_STATUS_PROCESSING + '" ORDER BY ' + Constants.PROCESS_NODE_SYSTEM_CPU_PERCENT + ' ASC'
+		return self._get_where(TABLES[Constants.TABLE_PROCESS_NODES], where_statement)
+
+	def get_all_idle_process_nodes(self):
+		where_statement = ' WHERE ' +  Constants.PROCESS_NODE_STATUS + '="' + Constants.PROCESS_NODE_STATUS_IDLE + '"'
+		return self._get_where(TABLES[Constants.TABLE_PROCESS_NODES], where_statement)
 
 	def _get_where(self, table, where_statement, opt_dict=None):
 		sql_statement, node_idxs = Gen_Select_All_Cols(table)

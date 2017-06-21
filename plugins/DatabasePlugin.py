@@ -68,6 +68,12 @@ class DatabasePlugin(plugins.SimplePlugin):
 	def get_all_process_nodes(self):
 		return self.db.get_all_process_nodes()
 
+	def get_all_processing_process_nodes(self):
+		return self.db.get_all_processing_process_nodes()
+
+	def get_all_idle_process_nodes(self):
+		return self.db.get_all_idle_process_nodes()
+
 	def get_process_node_by_name(self, node_name):
 		return self.db.get_process_node_by_name(node_name)
 

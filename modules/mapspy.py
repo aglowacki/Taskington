@@ -2,7 +2,9 @@ import Constants
 import os
 import glob
 import sys
-
+import h5py
+import StringIO
+import scipy.misc
 
 # XRF JOB ARGS KEYS
 JOB_IS_LIVE_JOB = 'Is_Live_Job'  # INTEGER
@@ -32,6 +34,57 @@ def gen_args_dict():
 		JOB_DETECTOR_TO_START_WITH:0,
 		JOB_PROC_MASK:0
 	}
+
+
+def gen_email_attachments(job_dict):
+	images_dict = None
+	try:
+		# create image dictionary
+		images_dict = {}
+		full_file_name = ''
+		# check how many datasets are in job
+		file_name = ''
+		file_dir = os.path.join(job_dict[Constants.JOB_DATA_PATH], Constants.DIR_IMG_DAT)
+		proc_mask = job_dict[Constants.JOB_PROC_MASK]
+		# will only check one file for images
+		if job_dict[Constants.JOB_DATASET_FILES_TO_PROC] == 'all':
+			#self.logger.warning('Warning: Too many datasets to parse images from')
+			return None
+		else:
+			temp_names = job_dict[Constants.JOB_DATASET_FILES_TO_PROC].split(',')
+			if len(temp_names) > 1:
+				#self.logger.warning('Warning: Can only parse one dataset for images, dataset list is %s', job_dict[Constants.JOB_DATASET_FILES_TO_PROC])
+				return None
+			temp_name = job_dict[Constants.JOB_DATASET_FILES_TO_PROC]
+
+			hdf_file_name = temp_name.replace('.mda', '.h5')
+			full_file_name = os.path.join(file_dir, hdf_file_name)
+
+		hdf_file = h5py.File(full_file_name, 'r')
+		maps_group = hdf_file[Constants.HDF5_GRP_MAPS]
+
+		if proc_mask & 4 == 4:
+			xrf_roi_dataset = maps_group[Constants.HDF5_DSET_XRF_FITS]
+		elif proc_mask & 1 == 1:
+			xrf_roi_dataset = maps_group[Constants.HDF5_DSET_XRF_ROI]
+		else:
+			#self.logger.warning('Warning: %s did not process XRF_ROI or XRF_FITS', file_name)
+			return None
+		channel_names = maps_group[Constants.HDF5_GRP_CHANNEL_NAMES]
+
+		if channel_names.shape[0] != xrf_roi_dataset.shape[0]:
+			#self.logger.warning('Warning: file %s : Datasets: %s [%s] and %s [%s] length missmatch', file_name, Constants.HDF5_DSET_XRF_ROI, xrf_roi_dataset.shape[0], Constants.HDF5_GRP_CHANNEL_NAMES, channel_names.shape[0])
+			return None
+
+		for i in range(channel_names.size):
+			outbuf = StringIO.StringIO()
+			img = scipy.misc.toimage(xrf_roi_dataset[i], mode='L')
+			img.save(outbuf, format='PNG')
+			name = 'channel_' + channel_names[i] + '.png'
+			images_dict[name] = outbuf.getvalue()
+	except:
+		images_dict = None
+	return images_dict
 
 
 def start_job(log_name, alias_path, job_dict, options, exitcode):

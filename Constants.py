@@ -79,6 +79,10 @@ JOB_LOG_PATH = 'Log_Path'  # TEXT
 JOB_PROCESS_NODE_ID = 'Process_Node_Id'  # INTEGER
 JOB_EMAILS = 'Emails'  # TEXT comma separated
 JOB_ARGS = 'Args'  # DICTIONARY
+JOB_IS_CONCURRENT = 'IsConcurrent'
+
+# optional
+JOB_EMAIL_ATTACHMENTS = 'EmailAttachments'
 
 # ===================================== General Keys =======================================
 STR_JOB_LOG_DIR_NAME = 'job_logs'

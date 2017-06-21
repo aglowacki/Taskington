@@ -59,6 +59,7 @@ class ProcessNode(RestBase):
 		pnSettings = settings.getSetting(Settings.SECTION_PROCESS_NODE)
 		#print 'Server settings ', serverSettings
 		#print 'ProcessNode Settings ', pnSettings
+		self.running_jobs = {}
 		self.pn_info = {Constants.PROCESS_NODE_COMPUTERNAME: pnSettings[Settings.PROCESS_NODE_NAME],
 					Constants.PROCESS_NODE_NUM_THREADS: pnSettings[Settings.PROCESS_NODE_THREADS],
 					Constants.PROCESS_NODE_HOSTNAME: serverSettings[Settings.SERVER_HOSTNAME],
@@ -155,17 +156,20 @@ class ProcessNode(RestBase):
 
 	def callback_delete_job(self, job):
 		try:
-			#if job[Constants.JOB_ID] == self.jo
 			job[Constants.JOB_STATUS] = Constants.JOB_STATUS_CANCELED
 			#self.db.update_job(job)
 			self.db.delete_job_by_id(job[Constants.JOB_ID])
-			if self.this_process != psutil.Process(os.getpid()):
-				parent = psutil.Process(self.this_process.pid)
+			if job[Constants.JOB_ID] in self.running_jobs:
+				run_tuple = self.running_jobs[job[Constants.JOB_ID]]
+				#  (job_dict, proc, method)
+				proc = run_tuple[1]
+				parent = psutil.Process(proc.pid)
 				for child in parent.children(recursive=True):  # or parent.children() for recursive=False
 					child.kill()
 				self.this_process.kill()
 				self.this_process = psutil.Process(os.getpid())
 				job[Constants.JOB_STATUS] = Constants.JOB_STATUS_CANCELED
+				self.running_jobs.pop(job[Constants.JOB_ID])
 			self.send_job_update(job)
 		except:
 			self.logger.exception('callback_delete_job: Error')
@@ -194,34 +198,65 @@ class ProcessNode(RestBase):
 			#print datetime.now(), 'Error sending post'
 		self.pn_info[Constants.PROCESS_NODE_STATUS] = Constants.PROCESS_NODE_STATUS_IDLE
 		# start status thread
-		if self.status_thread == None:
-			self.status_thread = threading.Thread(target=self.status_thread_func)
-			self.status_thread.start()
+		#if self.status_thread == None:
+		#	self.status_thread = threading.Thread(target=self.status_thread_func)
+		#	self.status_thread.start()
 		self.new_job_event.set() # set it at start to check for unfinished jobs
 		try:
 			while self.running:
+				jobs_to_remove = []
 				self.new_job_event.wait(self.status_update_interval)
 				if self.new_job_event.is_set():
 					self.new_job_event.clear()
 					self.process_next_job()
-				#else:
-				#	self.send_status_update()
-				#	#self.process_next_job()
 				if cherrypy.engine.state != cherrypy.engine.states.STARTED and self.running:
 					# if cherrypy engine stopped but this thread is still alive, restart it.
 					self.logger.info( 'CherryPy Engine state = %s', cherrypy.engine.state)
 					self.logger.info('Calling cherrypy.engine.start()')
 					cherrypy.engine.start()
-				if not self.status_thread.is_alive():
-					self.status_thread = threading.Thread(target=self.status_thread_func)
-					self.status_thread.start()
+				#if not self.status_thread.is_alive():
+				#	self.status_thread = threading.Thread(target=self.status_thread_func)
+				#	self.status_thread.start()
+				for key,value in self.running_jobs.iteritems():
+					proc2 = value[1]
+					if proc2.exitcode == None and proc2.is_alive():
+						continue
+					else:
+						job_dict = value[0]
+						self.logger.debug('Finished processing job', job_dict)
+						proc2.join()
+						jobs_to_remove += [key]
+						self.this_process = psutil.Process(os.getpid())
+						self.logger.debug("Process finished with exitcode %s", proc2.exitcode)
+						job_dict[Constants.JOB_FINISH_PROC_TIME] = datetime.ctime(datetime.now())
+						if proc2.exitcode != 0:
+							self.logger.info('finished processing job with status ERROR')
+							job_dict[Constants.JOB_STATUS] = Constants.JOB_STATUS_GENERAL_ERROR
+						else:
+							self.logger.info('finished processing job with status COMPLETED')
+							job_dict[Constants.JOB_STATUS] = Constants.JOB_STATUS_COMPLETED
+							method = value[2]
+							attachments = method.gen_email_attachments(job_dict)
+							if not attachments == None:
+								job_dict[Constants.JOB_EMAILS_ATTACHMENTS] = attachments
+						if self.db.update_job(job_dict):
+							self.send_job_update(job_dict)
+						#  process next job if we have any queued
+						self.new_job_event.set()
+				#  remove done jobs from running_jobs list
+				for job_id in jobs_to_remove:
+					self.running_jobs.pop(job_id)
+				if len(self.running_jobs) == 0:
+					self.this_process = psutil.Process(os.getpid())
+					self.logger.info('Finished Processing, going to Idle')
+					self.pn_info[Constants.PROCESS_NODE_STATUS] = Constants.PROCESS_NODE_STATUS_IDLE
+				if self.running:
+					self.send_status_update()
 		except:
 			self.logger.exception('run error')
 			self.stop()
 
-	def update_proc_info(self):
-		self.pn_info[Constants.PROCESS_NODE_STATUS]
-
+	'''
 	# thread function for sending status during processing
 	def status_thread_func(self):
 		try:
@@ -238,6 +273,7 @@ class ProcessNode(RestBase):
 		except:
 			self.logger.exception('status_thread_func error')
 		self.logger.warning('Stopped Status Thread')
+	'''
 
 	def check_for_alias(self, directory_str, alias_dict):
 		ret_str = directory_str
@@ -251,9 +287,12 @@ class ProcessNode(RestBase):
 		if self.running == False:
 			return
 		self.logger.info('checking for jobs to process')
-		job_list = self.db.get_all_unprocessed_and_processing_jobs()
+		job_list = self.db.get_all_unprocessed_jobs()
 		for job_dict in job_list:
 			try:
+				#  if we are processing and job is not concurrent, then skip until we are done processing
+				if job_dict[Constants.JOB_IS_CONCURRENT] == 0 and self.pn_info[Constants.PROCESS_NODE_STATUS] == Constants.PROCESS_NODE_STATUS_PROCESSING:
+					continue
 				alias_path = self.check_for_alias(job_dict[Constants.JOB_DATA_PATH], self.path_alias_dict)
 				alias_path = alias_path.replace('\\', '/')
 				self.logger.info('processing job: %s  alias_path: %s', job_dict[Constants.JOB_DATA_PATH], alias_path)
@@ -264,7 +303,7 @@ class ProcessNode(RestBase):
 				log_name = 'Job_' + str(job_dict[Constants.JOB_ID]) + '_' + datetime.strftime(datetime.now(), "%y_%m_%d_%H_%M_%S") + '.log'
 				job_dict[Constants.JOB_LOG_PATH] = log_name
 
-				job_logger = None
+				#job_logger = None
 				proc = None
 				exitcode = -1
 				self.db.update_job(job_dict)
@@ -276,51 +315,24 @@ class ProcessNode(RestBase):
 					method = getattr(modules, program[Constants.SOFTWARE_MODULE])
 					proc = multiprocessing.Process(target=method.start_job, args=(log_name, alias_path, job_dict, program[Constants.SOFTWARE_MODULE_OPTIONS], exitcode))
 				if not proc == None:
+					self.running_jobs[job_dict[Constants.JOB_ID]] = (job_dict, proc, method)
 					proc.start()
 					self.this_process = psutil.Process(proc.pid)
-					#  todo: if allow more than 1 job put in a list and check on it
-					proc.join()
-					exitcode = proc.exitcode
-				self.this_process = psutil.Process(os.getpid())
-				self.logger.debug("Process finished with exitcode %s", exitcode)
-				job_dict[Constants.JOB_FINISH_PROC_TIME] = datetime.ctime(datetime.now())
-				if exitcode != 0:
-					self.logger.info('finished processing job with status ERROR')
-					job_dict[Constants.JOB_STATUS] = Constants.JOB_STATUS_GENERAL_ERROR
-				else:
-					self.logger.info('finished processing job with status COMPLETED')
-					job_dict[Constants.JOB_STATUS] = Constants.JOB_STATUS_COMPLETED
-				if not job_logger == None:
-					handlers = job_logger.handlers[:]
-					for handler in handlers:
-						handler.close()
-						job_logger.removeHandler(handler)
 			except:
 				self.logger.exception('Error processing %s', job_dict[Constants.JOB_DATA_PATH])
 				job_dict[Constants.JOB_FINISH_PROC_TIME] = datetime.ctime(datetime.now())
 				job_dict[Constants.JOB_STATUS] = Constants.JOB_STATUS_GENERAL_ERROR
-				try:
-					handlers = job_logger.handlers[:]
-					for handler in handlers:
-						handler.close()
-						job_logger.removeHandler(handler)
-				except:
-					pass
-			if self.db.update_job(job_dict):
-				self.send_job_update(job_dict)
-			self.send_status_update()
-			self.logger.info('Done processing job: %s STATUS = %s', job_dict[Constants.JOB_DATA_PATH], job_dict[Constants.JOB_STATUS])
-		self.logger.info('Finished Processing, going to Idle')
-		self.pn_info[Constants.PROCESS_NODE_STATUS] = Constants.PROCESS_NODE_STATUS_IDLE
-		self.send_status_update()
 
 	def stop(self):
+		self.pn_info[Constants.PROCESS_NODE_STATUS] = Constants.PROCESS_NODE_STATUS_OFFLINE
 		self.running = False
 		self.status_event.set()
+		'''
 		if self.status_thread is not None:
 			self.logger.info('Waiting for status thread to join')
 			self.status_thread.join()
 		self.new_job_event.set()
+		'''
 		try:
 			self.pn_info[Constants.PROCESS_NODE_STATUS] = Constants.PROCESS_NODE_STATUS_OFFLINE
 			self.pn_info[Constants.PROCESS_NODE_PROCESS_CPU_PERCENT] = 0.0
@@ -337,6 +349,7 @@ class ProcessNode(RestBase):
 	def send_status_update(self):
 		try:
 			self.pn_info[Constants.PROCESS_NODE_HEARTBEAT] = str(datetime.now())
+			#self.pn_info[Constants.PROCESS_NODE_QUEUED_JOBS] = len(self.running_jobs.keys())
 			self.session.put(self.scheduler_pn_url, data=json.dumps(self.pn_info))
 		except:
 			#exc_str = traceback.format_exc()
