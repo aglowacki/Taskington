@@ -382,7 +382,12 @@
                 return;
             }
             
+            var $isConcurrent = 0;
             
+            if ($is_live_job === 1)
+            {
+                $isConcurrent = 1;
+            }
             
             $.ajax(
             {
@@ -402,7 +407,7 @@
                     'Emails': $("#option-emails").val(),
                     'Process_Node_Id': parseInt($pn_id, 10),
                     'DatasetFilesToProc': $dataset_filenames,
-                    'IsConcurrent': 1,
+                    'IsConcurrent': $isConcurrent,
                     'Args': {
                         'ProcMask': $procMask,
                         'Standards': 'maps_standardinfo.txt', //$("#option-standard").val(),

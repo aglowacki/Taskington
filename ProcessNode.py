@@ -349,6 +349,11 @@ class ProcessNode(RestBase):
 	def send_status_update(self):
 		try:
 			self.pn_info[Constants.PROCESS_NODE_HEARTBEAT] = str(datetime.now())
+			self.pn_info[Constants.PROCESS_NODE_PROCESS_CPU_PERCENT] = self.this_process.cpu_percent()
+			self.pn_info[Constants.PROCESS_NODE_PROCESS_MEM_PERCENT] = math.floor(self.this_process.memory_percent() * 100) / 100
+			self.pn_info[Constants.PROCESS_NODE_SYSTEM_CPU_PERCENT] = psutil.cpu_percent()
+			self.pn_info[Constants.PROCESS_NODE_SYSTEM_MEM_PERCENT] = psutil.virtual_memory().percent
+			self.pn_info[Constants.PROCESS_NODE_SYSTEM_SWAP_PERCENT] = psutil.swap_memory().percent
 			#self.pn_info[Constants.PROCESS_NODE_QUEUED_JOBS] = len(self.running_jobs.keys())
 			self.session.put(self.scheduler_pn_url, data=json.dumps(self.pn_info))
 		except:
