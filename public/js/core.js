@@ -472,7 +472,7 @@
                 url:"/job",
                 contentType: 'application/json; charset=utf-8',
                 data: JSON.stringify({
-                    'Experiment': 'Ptycholib',
+                    'Experiment': 'PtychoLib',
                     'BeamLine': '2-ID-D',
                     'DataPath': $("#Pty-DataPath").val(),
                     'Version': '1.00',
