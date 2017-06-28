@@ -238,7 +238,7 @@ class ProcessNode(RestBase):
 							method = value[2]
 							attachments = method.gen_email_attachments(job_dict)
 							if not attachments == None:
-								job_dict[Constants.JOB_EMAILS_ATTACHMENTS] = attachments
+								job_dict[Constants.JOB_EMAIL_ATTACHMENTS] = attachments
 						if self.db.update_job(job_dict):
 							self.send_job_update(job_dict)
 						#  process next job if we have any queued
