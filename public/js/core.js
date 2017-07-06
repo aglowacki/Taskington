@@ -221,6 +221,7 @@
                           'Dataset Files To Process: ' + d.DatasetFilesToProc +'<br>'+
                           'Process Node: '+$host_name+'<br>'+ 
                           'Email Addresses: '+d.Emails+'<br>'+
+                          'IsConcurrent: ' +d.IsConcurrent+'<br>'+
                           '<a href=http://'+$host_and_port+'/get_job_log?log_path='+d.Log_Path+'>Job Log</a><br>';
                           
             if(d.Experiment === 'XRF-Maps' || d.Experiment === 'MapsPy')
@@ -232,6 +233,7 @@
                            'NNLS: '+d.Args.NNLS+'<br>'+
                            'Lines processed in parrallel: '+d.Args.MaxLinesToProc+'<br>'+
                            'Files processed in parrallel: '+d.Args.MaxFilesToProc+'<br>'+
+                           'Live Job: '+d.Args.Is_Live_Job+'<br>'+
                            '<a href=/get_output_list?job_path='+d.DataPath+'>Output Directory</a> (output_old) <br>'+
                            '<a href=/get_output_list?job_path='+d.DataPath+'&process_type=PER_PIXEL>Output Directory</a> (output.fits) Per Pixel Fitting<br>';
                            
@@ -382,8 +384,6 @@
                 return;
             }
             
-            
-            
             $.ajax(
             {
                 type: 'POST',
@@ -402,6 +402,7 @@
                     'Emails': $("#option-emails").val(),
                     'Process_Node_Id': parseInt($pn_id, 10),
                     'DatasetFilesToProc': $dataset_filenames,
+                    'IsConcurrent': $is_live_job,
                     'Args': {
                         'ProcMask': $procMask,
                         'Standards': 'maps_standardinfo.txt', //$("#option-standard").val(),
@@ -471,7 +472,7 @@
                 url:"/job",
                 contentType: 'application/json; charset=utf-8',
                 data: JSON.stringify({
-                    'Experiment': 'Ptycholib',
+                    'Experiment': 'PtychoLib',
                     'BeamLine': '2-ID-D',
                     'DataPath': $("#Pty-DataPath").val(),
                     'Version': '1.00',
@@ -483,6 +484,7 @@
                     'Emails': $("#pty-option-emails").val(),
                     'Process_Node_Id': $node_id,
                     'DatasetFilesToProc': $dataset_filenames,
+                    'IsConcurrent': 1,
                     'Args': {
                         'CalcSTXM': $calc_stxm,
                         'AlgorithmEPIE': $alg_epie,
@@ -878,13 +880,13 @@
                 if ( idx === -1 ) 
                 {
                     if (detail_id === 1)
-                        $detailPnRows.push( tr.attr('id') );
+                        $detailPnRows.push( row );
                     else if (detail_id === 2)
-                        $detailQuJobRows.push( tr.attr('id') );
+                        $detailQuJobRows.push( row );
                     else if (detail_id === 3)
-                        $detailPRJobRows.push( tr.attr('id') );
+                        $detailPRJobRows.push( row );
                     else if (detail_id === 4)
-                        $detailJobRows.push( tr.attr('id') );
+                        $detailJobRows.push( row );
                 }
             }
         });
@@ -948,9 +950,9 @@
  
         $pn_table.on( 'draw', function () 
         {
-            $.each( $detailPnRows, function ( i, id ) 
+            $.each( $detailPnRows, function ( i, row ) 
             {
-                $('#'+id+' td.details-control').trigger( 'click' );
+                row.child( format_pn_details( row.data() ) ).show();
             });
             
             var $node_list1 = $pn_table.data();
@@ -969,9 +971,9 @@
 
         $queued_table.on( 'draw', function () 
         {
-            $.each( $detailQuJobRows, function ( i, id ) 
+            $.each( $detailQuJobRows, function ( i, row ) 
             {
-                $('#'+id+' td.details-control').trigger( 'click' );
+                row.child( format_job_details( row.data() ) ).show();
             });
         });
 
@@ -979,9 +981,9 @@
  
         $processing_table.on( 'draw', function () 
         {
-            $.each( $detailPRJobRows, function ( i, id ) 
+            $.each( $detailPRJobRows, function ( i, row ) 
             {
-                $('#'+id+' td.details-control').trigger( 'click' );
+                row.child( format_job_details( row.data() ) ).show();
             });
         });
  
@@ -989,9 +991,9 @@
  
         $finished_table.on( 'draw', function () 
         {
-            $.each( $detailJobRows, function ( i, id ) 
+            $.each( $detailJobRows, function ( i, row ) 
             {
-                $('#'+id+' td.details-control').trigger( 'click' );
+                row.child( format_job_details( row.data() ) ).show();
             });
         });
         

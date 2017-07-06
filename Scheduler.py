@@ -47,9 +47,6 @@ from RestBase import RestBase
 import threading
 from datetime import datetime
 import Constants
-import h5py
-import StringIO
-import scipy.misc
 import glob
 import time
 import shutil
@@ -136,20 +133,20 @@ class Scheduler(RestBase):
 				if job[Constants.JOB_EXPERIMENT] in p_node[Constants.PROCESS_NODE_SUPPORTED_SOFTWARE]:
 					self.send_job_to_process_node(job, p_node)
 			else:
-				node_list = db.get_all_process_nodes()
+				node_list = db.get_all_idle_process_nodes()
+				if job[Constants.JOB_IS_CONCURRENT] == 1:
+					node_list += db.get_all_processing_process_nodes()
 				self.logger.info('searching for idle node')
-				for node in node_list:
-					if node[Constants.PROCESS_NODE_STATUS] == Constants.PROCESS_NODE_STATUS_IDLE:
-						p_node = node
-						if p_node != None:
-							if job[Constants.JOB_EXPERIMENT] in p_node[Constants.PROCESS_NODE_SUPPORTED_SOFTWARE]:
-								job[Constants.JOB_PROCESS_NODE_ID] = p_node[Constants.PROCESS_NODE_ID]
-								r = self.send_job_to_process_node(job, p_node)
-								if r.status_code == 200:
-									db.update_job_pn(job[Constants.JOB_ID], p_node[Constants.PROCESS_NODE_ID])
-									break
-								else:
-									job[Constants.JOB_PROCESS_NODE_ID] = -1
+				for p_node in node_list:
+					if p_node != None:
+						if job[Constants.JOB_EXPERIMENT] in p_node[Constants.PROCESS_NODE_SUPPORTED_SOFTWARE]:
+							job[Constants.JOB_PROCESS_NODE_ID] = p_node[Constants.PROCESS_NODE_ID]
+							r = self.send_job_to_process_node(job, p_node)
+							if r.status_code == 200:
+								db.update_job_pn(job[Constants.JOB_ID], p_node[Constants.PROCESS_NODE_ID])
+								break
+							else:
+								job[Constants.JOB_PROCESS_NODE_ID] = -1
 			self.job_lock.release()
 		except:
 			self.job_lock.release()
@@ -167,11 +164,13 @@ class Scheduler(RestBase):
 				else:
 					subject = Constants.EMAIL_SUBJECT_ERROR
 					mesg = Constants.EMAIL_MESSAGE_ERROR
-				image_dict = self._get_images_from_hdf(job)
+				attachments = None
+				if Constants.JOB_EMAIL_ATTACHMENTS in job:
+					attachments = job[Constants.JOB_EMAIL_ATTACHMENTS]
 				for key in job.iterkeys():
 					mesg += key + ': ' + str(job[key]) + '\n'
 				try:
-					self.mailman.send(job[Constants.JOB_EMAILS], subject, mesg, image_dict)
+					self.mailman.send(job[Constants.JOB_EMAILS], subject, mesg, attachments)
 				except:
 					self.logger.exception("Error")
 
@@ -308,81 +307,6 @@ class Scheduler(RestBase):
 					self.logger.exception("Error moving file " + value)
 			else:
 				break
-
-	def _get_images_from_hdf(self, job):
-		images_dict = None
-		try:
-			# create image dictionary
-			images_dict = {}
-			full_file_name = ''
-			# check how many datasets are in job
-			file_name = ''
-			file_dir = os.path.join(job[Constants.JOB_DATA_PATH], Constants.DIR_IMG_DAT)
-			proc_mask = job[Constants.JOB_PROC_MASK]
-			# will only check one file for images
-			if job[Constants.JOB_DATASET_FILES_TO_PROC] == 'all':
-				self.logger.warning('Warning: Too many datasets to parse images from')
-				return None
-			else:
-				temp_names = job[Constants.JOB_DATASET_FILES_TO_PROC].split(',')
-				if len(temp_names) > 1:
-					self.logger.warning('Warning: Can only parse one dataset for images, dataset list is %s', job[Constants.JOB_DATASET_FILES_TO_PROC])
-					return None
-				temp_name = job[Constants.JOB_DATASET_FILES_TO_PROC]
-				if job[Constants.JOB_XANES_SCAN] == 1:
-					if proc_mask & 64 == 64: #generate avg
-						full_file_name = os.path.join(file_dir, temp_name + '.h5')
-					else:
-						full_file_name = os.path.join(file_dir, temp_name + '.h5' + str(job[Constants.JOB_DETECTOR_TO_START_WITH]))
-				else:
-					hdf_file_name = temp_name.replace('.mda', '.h5')
-					full_file_name = os.path.join(file_dir, hdf_file_name)
-
-			hdf_file = h5py.File(full_file_name, 'r')
-			maps_group = hdf_file[Constants.HDF5_GRP_MAPS]
-			if job[Constants.JOB_XANES_SCAN] == 1:
-				h5_grp = None
-				analyzed_grp = maps_group[Constants.HDF5_GRP_ANALYZED]
-				if analyzed_grp == None:
-					self.logger.warning('Warning: %s did not find '+Constants.HDF5_GRP_ANALYZED, file_name)
-					return None
-				if job[Constants.JOB_NNLS] == 1:
-					h5_grp = analyzed_grp[Constants.HDF5_GRP_NNLS]
-				elif proc_mask & 4 == 4:
-					h5_grp = analyzed_grp[Constants.HDF5_GRP_FITS]
-				elif proc_mask & 1 == 1:
-					h5_grp = analyzed_grp[Constants.HDF5_GRP_ROI]
-				else:
-					self.logger.warning('Warning: %s did not process XRF_ROI or XRF_FITS', file_name)
-					return None
-				if not h5_grp == None:
-					xrf_roi_dataset = h5_grp[Constants.HDF5_DSET_COUNTS]
-					channel_names = h5_grp[Constants.HDF5_DSET_CHANNELS]
-				else:
-					return None
-			else:
-				if proc_mask & 1 == 1:
-					xrf_roi_dataset = maps_group[Constants.HDF5_DSET_XRF_ROI]
-				elif proc_mask & 4 == 4:
-					xrf_roi_dataset = maps_group[Constants.HDF5_DSET_XRF_FITS]
-				else:
-					self.logger.warning('Warning: %s did not process XRF_ROI or XRF_FITS', file_name)
-					return None
-				channel_names = maps_group[Constants.HDF5_GRP_CHANNEL_NAMES]
-
-			if channel_names.shape[0] != xrf_roi_dataset.shape[0]:
-				self.logger.warning('Warning: file %s : Datasets: %s [%s] and %s [%s] length missmatch', file_name, Constants.HDF5_DSET_XRF_ROI, xrf_roi_dataset.shape[0], Constants.HDF5_GRP_CHANNEL_NAMES, channel_names.shape[0])
-				return None
-
-			for i in range(channel_names.size):
-				outbuf = StringIO.StringIO()
-				img = scipy.misc.toimage(xrf_roi_dataset[i], mode='L')
-				img.save(outbuf, format='PNG')
-				name = 'channel_' + channel_names[i] + '.png'
-				images_dict[name] = outbuf.getvalue()
-		except:
-			images_dict = None
-		return images_dict
 
 	def run(self):
 		db.subscribe()
