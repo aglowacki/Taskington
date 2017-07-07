@@ -137,6 +137,10 @@ class SchedulerHandler(object):
 		return file('public/scheduler_index.html')
 
 	@cherrypy.expose
+	def new(self):
+		return file('new-public/index.html')
+
+	@cherrypy.expose
 	def api(self):
 		return self.show_api()
 
