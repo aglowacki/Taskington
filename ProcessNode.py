@@ -197,7 +197,13 @@ class ProcessNode(RestBase):
 			self.logger.error('Error sending post')
 			#print datetime.now(), 'Error sending post'
 		self.pn_info[Constants.PROCESS_NODE_STATUS] = Constants.PROCESS_NODE_STATUS_IDLE
-		# start status thread
+		#  On startup check to see if we had processing jobs and set them as failed. TODO: restart the job instead
+		old_proc_jobs = self.db.get_all_processing_jobs()
+		for job in old_proc_jobs:
+			job[Constants.JOB_STATUS] = Constants.JOB_STATUS_GENERAL_ERROR
+			self.db.update_job(job)
+			self.send_job_update(job)
+		#  DEPRICATED: start status thread
 		#if self.status_thread == None:
 		#	self.status_thread = threading.Thread(target=self.status_thread_func)
 		#	self.status_thread.start()
@@ -257,7 +263,7 @@ class ProcessNode(RestBase):
 			self.stop()
 
 	'''
-	# thread function for sending status during processing
+	#  DEPRICATED: thread function for sending status during processing
 	def status_thread_func(self):
 		try:
 			self.logger.info('Started Status Thread')
@@ -366,7 +372,7 @@ class ProcessNode(RestBase):
 			self.session.put(self.scheduler_job_url, params=self.pn_info, data=json.dumps(job_dict))
 			self.logger.info('sent job status %s', job_dict)
 		except:
-			exc_str = traceback.format_exc()
-			print exc_str
+			#exc_str = traceback.format_exc()
+			#print exc_str
 			self.logger.exception('Error sending job update')
 

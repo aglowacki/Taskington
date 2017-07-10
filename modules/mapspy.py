@@ -4,7 +4,9 @@ import glob
 import sys
 import h5py
 import StringIO
-import scipy.misc
+from PIL import Image
+import numpy as np
+import binascii
 
 # XRF JOB ARGS KEYS
 JOB_IS_LIVE_JOB = 'Is_Live_Job'  # INTEGER
@@ -45,7 +47,8 @@ def gen_email_attachments(job_dict):
 		# check how many datasets are in job
 		file_name = ''
 		file_dir = os.path.join(job_dict[Constants.JOB_DATA_PATH], Constants.DIR_IMG_DAT)
-		proc_mask = job_dict[Constants.JOB_PROC_MASK]
+		job_args = job_dict[Constants.JOB_ARGS]
+		proc_mask = job_args[JOB_PROC_MASK]
 		# will only check one file for images
 		if job_dict[Constants.JOB_DATASET_FILES_TO_PROC] == 'all':
 			#self.logger.warning('Warning: Too many datasets to parse images from')
@@ -64,24 +67,25 @@ def gen_email_attachments(job_dict):
 		maps_group = hdf_file[Constants.HDF5_GRP_MAPS]
 
 		if proc_mask & 4 == 4:
-			xrf_roi_dataset = maps_group[Constants.HDF5_DSET_XRF_FITS]
+			xrf_dataset = np.nan_to_num(maps_group[Constants.HDF5_DSET_XRF_FITS])
 		elif proc_mask & 1 == 1:
-			xrf_roi_dataset = maps_group[Constants.HDF5_DSET_XRF_ROI]
+			xrf_dataset = np.nan_to_num(maps_group[Constants.HDF5_DSET_XRF_ROI])
 		else:
 			#self.logger.warning('Warning: %s did not process XRF_ROI or XRF_FITS', file_name)
 			return None
 		channel_names = maps_group[Constants.HDF5_GRP_CHANNEL_NAMES]
 
-		if channel_names.shape[0] != xrf_roi_dataset.shape[0]:
-			#self.logger.warning('Warning: file %s : Datasets: %s [%s] and %s [%s] length missmatch', file_name, Constants.HDF5_DSET_XRF_ROI, xrf_roi_dataset.shape[0], Constants.HDF5_GRP_CHANNEL_NAMES, channel_names.shape[0])
+		if channel_names.shape[0] != xrf_dataset.shape[0]:
+			#self.logger.warning('Warning: file %s : Datasets: %s [%s] and %s [%s] length missmatch', file_name, Constants.HDF5_DSET_XRF_ROI, xrf_dataset.shape[0], Constants.HDF5_GRP_CHANNEL_NAMES, channel_names.shape[0])
 			return None
 
 		for i in range(channel_names.size):
 			outbuf = StringIO.StringIO()
-			img = scipy.misc.toimage(xrf_roi_dataset[i], mode='L')
-			img.save(outbuf, format='PNG')
-			name = 'channel_' + channel_names[i] + '.png'
-			images_dict[name] = outbuf.getvalue()
+			I8 = (((xrf_dataset[i] - np.min(xrf_dataset[i])) / (np.max(xrf_dataset[i]) - np.min(xrf_dataset[i]))) * 255.9).astype(np.uint8)
+			img = Image.fromarray(I8,  mode='L')
+			img.save(outbuf, format='JPEG')
+			name = 'channel_' + channel_names[i] + '.jpg'
+			images_dict[name] = binascii.b2a_base64(outbuf.getvalue())
 	except:
 		images_dict = None
 	return images_dict

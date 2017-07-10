@@ -50,6 +50,7 @@ import Constants
 import glob
 import time
 import shutil
+import binascii
 
 db = DatabasePlugin(cherrypy.engine, SQLiteDB)
 
@@ -166,7 +167,10 @@ class Scheduler(RestBase):
 					mesg = Constants.EMAIL_MESSAGE_ERROR
 				attachments = None
 				if Constants.JOB_EMAIL_ATTACHMENTS in job:
+					for key in job[Constants.JOB_EMAIL_ATTACHMENTS].iterkeys():
+						job[Constants.JOB_EMAIL_ATTACHMENTS][key] = binascii.a2b_base64(job[Constants.JOB_EMAIL_ATTACHMENTS][key])
 					attachments = job[Constants.JOB_EMAIL_ATTACHMENTS]
+					job.pop(Constants.JOB_EMAIL_ATTACHMENTS)
 				for key in job.iterkeys():
 					mesg += key + ': ' + str(job[key]) + '\n'
 				try:

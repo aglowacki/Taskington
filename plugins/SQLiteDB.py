@@ -34,6 +34,7 @@ SUCH DAMAGE.
 import sqlite3 as sql
 import Constants
 import json
+import traceback
 
 DELETE_JOB_BY_ID = 'DELETE FROM Jobs WHERE Id=:Id'
 
@@ -214,18 +215,24 @@ class SQLiteDB:
 		con.commit()
 
 	def insert_job(self, job_dict):
-		print 'insert job', job_dict
-		if Constants.JOB_ARGS in job_dict:
-			#jenc = json.JSONEncoder()
-			#job_dict[Constants.JOB_ARGS] = jenc.encode(job_dict[Constants.JOB_ARGS])
-			if type(job_dict[Constants.JOB_ARGS]) == type({}):
-				job_dict[Constants.JOB_ARGS] = json.dumps(job_dict[Constants.JOB_ARGS])
-		sql_statement = Gen_Insert_Into_Table(TABLES[Constants.TABLE_JOBS], job_dict)
-		con = sql.connect(self.uri)
-		cur = con.cursor()
-		cur.execute(sql_statement)
-		con.commit()
-		return cur.lastrowid
+		try:
+			print 'insert job', job_dict
+			if Constants.JOB_ARGS in job_dict:
+				#jenc = json.JSONEncoder()
+				#job_dict[Constants.JOB_ARGS] = jenc.encode(job_dict[Constants.JOB_ARGS])
+				if type(job_dict[Constants.JOB_ARGS]) == type({}):
+					job_dict[Constants.JOB_ARGS] = json.dumps(job_dict[Constants.JOB_ARGS])
+			sql_statement = Gen_Insert_Into_Table(TABLES[Constants.TABLE_JOBS], job_dict)
+			con = sql.connect(self.uri)
+			cur = con.cursor()
+			cur.execute(sql_statement)
+			con.commit()
+			return cur.lastrowid
+		except:
+			con.close()
+			exc_str = traceback.format_exc()
+			raise ValueError(exc_str)
+
 
 	def gen_job_dict(self):
 		return Gen_Dict(TABLES[Constants.TABLE_JOBS])
@@ -341,6 +348,8 @@ class SQLiteDB:
 				job_dict[Constants.JOB_ARGS] = saved_args
 			return True
 		except:
+			exc_str = traceback.format_exc()
+			print exc_str
 			return False
 
 	def update_job_pn(self, job_id, pn_id):

@@ -6,6 +6,9 @@ import glob
 import h5py
 import StringIO
 import scipy.misc
+import binascii
+import numpy as np
+from PIL import Image
 
 
 # XRF JOB ARGS KEYS
@@ -47,7 +50,8 @@ def gen_email_attachments(job_dict):
 		#  check how many datasets are in job
 		file_name = ''
 		file_dir = os.path.join(job_dict[Constants.JOB_DATA_PATH], Constants.DIR_IMG_DAT)
-		proc_mask = job_dict[Constants.JOB_PROC_MASK]
+		job_args = job_dict[Constants.JOB_ARGS]
+		proc_mask = job_args[JOB_PROC_MASK]
 		# will only check one file for images
 		if job_dict[Constants.JOB_DATASET_FILES_TO_PROC] == 'all':
 			#logger.warning('Warning: Too many datasets to parse images from')
@@ -55,13 +59,12 @@ def gen_email_attachments(job_dict):
 		else:
 			temp_names = job_dict[Constants.JOB_DATASET_FILES_TO_PROC].split(',')
 			if len(temp_names) > 1:
-				#self.logger.warning('Warning: Can only parse one dataset for images, dataset list is %s', job_dict[Constants.JOB_DATASET_FILES_TO_PROC])
 				return None
 			temp_name = job_dict[Constants.JOB_DATASET_FILES_TO_PROC]
 			if proc_mask & 64 == 64: #generate avg
 				full_file_name = os.path.join(file_dir, temp_name + '.h5')
 			else:
-				full_file_name = os.path.join(file_dir, temp_name + '.h5' + str(job_dict[Constants.JOB_DETECTOR_TO_START_WITH]))
+				full_file_name = os.path.join(file_dir, temp_name + '.h5' + str(job_args[JOB_DETECTOR_TO_START_WITH] ))
 
 		hdf_file = h5py.File(full_file_name, 'r')
 		maps_group = hdf_file[Constants.HDF5_GRP_MAPS]
@@ -71,7 +74,7 @@ def gen_email_attachments(job_dict):
 		if analyzed_grp == None:
 			#logger.warning('Warning: %s did not find '+Constants.HDF5_GRP_ANALYZED, file_name)
 			return None
-		if job_dict[Constants.JOB_NNLS] == 1:
+		if job_args[JOB_NNLS] == 1:
 			h5_grp = analyzed_grp[Constants.HDF5_GRP_NNLS]
 		elif proc_mask & 4 == 4:
 			h5_grp = analyzed_grp[Constants.HDF5_GRP_FITS]
@@ -81,21 +84,22 @@ def gen_email_attachments(job_dict):
 			#self.logger.warning('Warning: %s did not process XRF_ROI or XRF_FITS', file_name)
 			return None
 		if not h5_grp == None:
-			xrf_roi_dataset = h5_grp[Constants.HDF5_DSET_COUNTS]
+			xrf_dataset = np.nan_to_num(h5_grp[Constants.HDF5_DSET_COUNTS])
 			channel_names = h5_grp[Constants.HDF5_DSET_CHANNELS]
 		else:
 			return None
 
-		if channel_names.shape[0] != xrf_roi_dataset.shape[0]:
-			#logger.warning('Warning: file %s : Datasets: %s [%s] and %s [%s] length missmatch', file_name, Constants.HDF5_DSET_XRF_ROI, xrf_roi_dataset.shape[0], Constants.HDF5_GRP_CHANNEL_NAMES, channel_names.shape[0])
+		if channel_names.shape[0] != xrf_dataset.shape[0]:
+			#logger.warning('Warning: file %s : Datasets: %s [%s] and %s [%s] length missmatch', file_name, Constants.HDF5_DSET_XRF_ROI, xrf_dataset.shape[0], Constants.HDF5_GRP_CHANNEL_NAMES, channel_names.shape[0])
 			return None
 
 		for i in range(channel_names.size):
 			outbuf = StringIO.StringIO()
-			img = scipy.misc.toimage(xrf_roi_dataset[i], mode='L')
-			img.save(outbuf, format='PNG')
-			name = 'channel_' + channel_names[i] + '.png'
-			images_dict[name] = outbuf.getvalue()
+			I8 = (((xrf_dataset[i] - np.min(xrf_dataset[i])) / (np.max(xrf_dataset[i]) - np.min(xrf_dataset[i]))) * 255.9).astype(np.uint8)
+			img = Image.fromarray(I8,  mode='L')
+			img.save(outbuf, format='JPEG')
+			name = 'channel_' + channel_names[i] + '.jpg'
+			images_dict[name] = binascii.b2a_base64(outbuf.getvalue())
 	except:
 		images_dict = None
 	return images_dict
