@@ -41,7 +41,7 @@ def gen_args_dict():
 	}
 
 
-def gen_email_attachments(job_dict):
+def gen_email_attachments(alias_path, job_dict):
 	images_dict = None
 	try:
 		#  create image dictionary
@@ -49,7 +49,7 @@ def gen_email_attachments(job_dict):
 		full_file_name = ''
 		#  check how many datasets are in job
 		file_name = ''
-		file_dir = os.path.join(job_dict[Constants.JOB_DATA_PATH], Constants.DIR_IMG_DAT)
+		file_dir = os.path.join(alias_path, Constants.DIR_IMG_DAT)
 		job_args = job_dict[Constants.JOB_ARGS]
 		proc_mask = job_args[JOB_PROC_MASK]
 		# will only check one file for images

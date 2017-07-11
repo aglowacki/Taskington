@@ -107,7 +107,7 @@ def gen_args_dict():
 	}
 
 
-def gen_email_attachments(job_dict):
+def gen_email_attachments(alias_path, job_dict):
 	return None
 
 

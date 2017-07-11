@@ -175,7 +175,6 @@ class ProcessNode(RestBase):
 			self.logger.exception('callback_delete_job: Error')
 
 	def parse_json_file(self, json_file):
-		#list should be comma separated for each software key and ; separated for name;path;exe
 		with open(json_file) as data_file:
 			parsed_obj = json.load(data_file)
 		return parsed_obj
@@ -242,7 +241,9 @@ class ProcessNode(RestBase):
 							self.logger.info('finished processing job with status COMPLETED')
 							job_dict[Constants.JOB_STATUS] = Constants.JOB_STATUS_COMPLETED
 							method = value[2]
-							attachments = method.gen_email_attachments(job_dict)
+							alias_path = self.check_for_alias(job_dict[Constants.JOB_DATA_PATH], self.path_alias_dict)
+							alias_path = alias_path.replace('\\', '/')
+							attachments = method.gen_email_attachments(alias_path, job_dict)
 							if not attachments == None:
 								job_dict[Constants.JOB_EMAIL_ATTACHMENTS] = attachments
 						if self.db.update_job(job_dict):
