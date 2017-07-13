@@ -805,11 +805,11 @@
         {
             $queued_table.ajax.reload(null, false);
             $processing_table.ajax.reload(null, false);
+            $pn_table.ajax.reload(null, false);
         }, 4000);
 	
         setInterval(function()
         {
-            $pn_table.ajax.reload(null, false);
             $finished_table.ajax.reload(null, false);
         }, 10000);
         

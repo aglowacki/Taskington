@@ -259,7 +259,7 @@ class SQLiteDB:
 		return self._get_where(TABLES[Constants.TABLE_PROCESS_NODES], where_statement)
 
 	def get_all_idle_process_nodes(self):
-		where_statement = ' WHERE ' +  Constants.PROCESS_NODE_STATUS + '="' + Constants.PROCESS_NODE_STATUS_IDLE + '"'
+		where_statement = ' WHERE ' +  Constants.PROCESS_NODE_STATUS + '="' + Constants.PROCESS_NODE_STATUS_IDLE + '" ORDER BY ' + Constants.PROCESS_NODE_NUM_THREADS + ' DESC'
 		return self._get_where(TABLES[Constants.TABLE_PROCESS_NODES], where_statement)
 
 	def _get_where(self, table, where_statement, opt_dict=None):
