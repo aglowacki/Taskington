@@ -1,0 +1,104 @@
+Job Path: <input type="text" pInputText [(ngModel)]="mapsJob.DataPath">
+<button type="button" (click)="showXfm0DirectoryDialog()" pButton icon="fa-search" label="xfm0"></button>
+<button type="button" (click)="showXfm0Data2DirectoryDialog()" pButton icon="fa-search" label="xfm0-data2"></button>
+<button type="button" (click)="showCNMDirectoryDialog()" pButton icon="fa-search" label="CNM"></button>
+
+<br/>
+<p-checkbox [(ngModel)]="allDatasets"></p-checkbox>All Datasets
+
+<br/><br/>
+
+<p-panel header="Analysis Options">
+
+  <div *ngFor="let option of analysisSelection">
+    <p-checkbox [(ngModel)]="option.value"
+                binary="true"></p-checkbox>
+    {{option.prompt}}
+
+    <br/>
+
+  </div>
+
+</p-panel>
+
+<br/>
+
+<p-panel header="Options">
+  <p-checkbox [(ngModel)]="QuickAndDirty" binary="true"></p-checkbox> Quick and Dirty <br/>
+  <p-checkbox [(ngModel)]="is_live_job" binary="true"></p-checkbox> Live Job <br/>
+  <p-checkbox [(ngModel)]="NNLS" binary="true"></p-checkbox> NNLS <br/>
+</p-panel>
+
+<div class="ui-g">
+  <div class="ui-g-2">Job Type:</div>
+  <div class="ui-g-2"><p-selectButton [options]="EXPERIMENT_OPTIONS" [(ngModel)]="mapsJob.Experiment"></p-selectButton></div>
+</div>
+
+<div class="ui-g">
+  <div class="ui-g-2">Detector to start with:</div>
+  <div class="ui-g-2"><p-spinner size="5"  [(ngModel)]="mapsJobArguments.DetectorToStartWith"></p-spinner></div>
+</div>
+
+<div class="ui-g">
+  <div class="ui-g-2">Total Number of Detectors:</div>
+  <div class="ui-g-2"><p-spinner size="5"  [(ngModel)]="mapsJobArguments.DetectorElements"></p-spinner></div>
+</div>
+
+<div class="ui-g" *ngIf="isMapsPyJob()">
+  <div class="ui-g-2">Number of <b>files</b> to process simultaneously:</div>
+  <div class="ui-g-2"><p-spinner size="5" [(ngModel)]="mapsJobArguments.MaxFilesToProc"></p-spinner></div>
+</div>
+
+<div class="ui-g">
+  <div class="ui-g-2">Number of <b>lines</b> to process simultaneously [-1: max available]:</div>
+  <div class="ui-g-2"><p-spinner size="5" [(ngModel)]="mapsJobArguments.MaxLinesToProc"></p-spinner></div>
+</div>
+
+<div class="ui-g">
+  <div class="ui-g-2">Priority (1 highest - 10 lowest):</div>
+  <div class="ui-g-2"><p-spinner size="5" [(ngModel)]="mapsJob.Priority" [min]="1" [max]="10"></p-spinner></div>
+</div>
+
+<div class="ui-g">
+  <div class="ui-g-2">Process Node:</div>
+  <div class="ui-g-2"><p-dropdown [options]="processNodesSelectItemList"
+                                  [(ngModel)]="mapsJob.Process_Node_Id"
+                                  autoWidth="false" [style]="{'width': '100%'}"></p-dropdown></div>
+</div>
+
+<div class="ui-g">
+  <div class="ui-g-2">Email Address for completion notification:</div>
+  <div class="ui-g-2">
+    <div class="ui-g-2">
+    <button type="button" (click)="addNewEmail()" pButton icon="fa-plus"></button>
+    </div>
+    <div class="ui-g-10">
+      <div *ngFor="let email of emailAddresses; let i = index;">
+        <div class="ui-g-11">
+          <input type="text" name="emailInput-{{i}}" pInputText [(ngModel)]="emailAddresses[i].value">
+        </div>
+        <div class="ui-g-1">
+          <button type="button" (click)="removeEmail(i)" pButton icon="fa-minus" class="ui-button-danger"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<br/>
+<button type="button" (click)="submitJob()" pButton icon="fa-check" label="Submit Job"></button>
+
+<p-dialog header="Browse directories" [(visible)]="displayDirectorySelectionDialog"
+          modal="modal">
+  <div class="jobPathSelectionTreeContainer">
+    <p-tree [value]="directorySelectionTree"
+            selectionMode="single"
+            [(selection)]="selectedDirectory" >
+
+    </p-tree>
+  </div>
+  <p-footer>
+    <button type="button" pButton icon="fa-check" (click)="makeDirectorySelection()" label="Select"></button>
+    <button type="button" pButton icon="fa-close" (click)="displayDirectorySelectionDialog=false" label="Close"></button>
+  </p-footer>
+</p-dialog>
