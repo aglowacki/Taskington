@@ -187,7 +187,6 @@ class SchedulerHandler(object):
 		return retstr
 
 	@cherrypy.expose
-	@cherrypy.tools.json_out()
 	def get_dataset_dirs_list(self, job_path, depth=0):
 		depth = int(depth)
 		job_roots_dict = self.settings.getSetting(Settings.SECTION_JOB_DIR_ROOTS)
@@ -209,7 +208,6 @@ class SchedulerHandler(object):
 			return jenc.encode(dir_list)
 
 	@cherrypy.expose
-	@cherrypy.tools.json_out()
 	def get_spectrum_image_list(self, job_path):
 		data_dict = dict()
 		img_path = os.path.join(job_path, 'output_old/*.png')
@@ -220,7 +218,6 @@ class SchedulerHandler(object):
 		return jenc.encode(data_dict)
 
 	@cherrypy.expose
-	@cherrypy.tools.json_out()
 	def get_mda_list(self, job_path):
 		data_dict = dict()
 		mda_path = os.path.join(job_path, 'mda/*.mda')
@@ -349,8 +346,9 @@ class SchedulerJobsWebService(object):
 	class for adding, updating, or removing jobs
 	'''
 	exposed = True
-	def __init__(self, db):
+	def __init__(self, db, devMode):
 		self.db = db
+		self.devMode = devMode
 
 	@cherrypy.tools.accept(media='text/plain')
 	#@cherrypy.tools.json_out()
@@ -392,6 +390,14 @@ class SchedulerJobsWebService(object):
 		job = json.loads(rawbody)
 		cherrypy.engine.publish("delete_job", job)
 		return 'Canceling job Id:' + str(job['Id'])
+
+	def OPTIONS(self):
+		if self.devMode:
+			options_headers = cherrypy.request.headers
+			cherrypy.response.headers['Access-Control-Allow-Origin'] = options_headers['Origin']
+			cherrypy.response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT';
+			cherrypy.response.headers['Access-Control-Allow-Headers'] = options_headers['Access-Control-Request-Headers']
+			cherrypy.response.headers['Content-Type'] = 'text/html; charset=utf-8'
 
 
 class SchedulerProcessNodeWebService(object):
