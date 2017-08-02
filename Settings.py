@@ -15,6 +15,7 @@ SERVER_FROM_ADDRESS			= 'from_address'
 SERVER_MAIL_USERNAME		= 'mail_username'
 SERVER_MAIL_PASSWORD		= 'mail_password'
 SCHEDULE_FILES_PATH			= 'schedule_files_path'
+SERVER_DEVELOPER_MODE       = 'developer_mode'
 SERVER_KEYS = [SERVER_ROLE, SERVER_HOSTNAME, SERVER_PORT, SERVER_SMTP_ADDRESS, SERVER_FROM_ADDRESS,
 				SERVER_MAIL_USERNAME, SERVER_MAIL_PASSWORD, SCHEDULE_FILES_PATH]
 
@@ -64,6 +65,10 @@ class SettingsIO:
 			return self.settingDicts[section]
 		else:
 			return dict()
+
+	def getSettingAsBoolean(self, section_name, setting_key):
+		value = self.settingDicts[section_name][setting_key]
+		return value.lower() == 'true'
 
 	def checkSectionKeys(self, section_name, keys):
 		for k in keys:
