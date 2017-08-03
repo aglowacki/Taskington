@@ -1,7 +1,7 @@
 /**
  * Created by djarosz on 6/29/17.
  */
-export class processNode {
+export class ProcessNode {
   Status: string;
   ComputerName: string;
   NumThreads: number;
@@ -13,5 +13,5 @@ export class processNode {
   SystemMemPercent: number;
   Heartbeat: string;
   ProcessCpuPercent: number;
-  id: number;
+  Id: number;
 }

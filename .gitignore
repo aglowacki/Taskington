@@ -2,6 +2,7 @@
 /*-settings.ini
 /.loglogin
 /new-public
+/job_logs
 .idea
 *.pyc
 /logs/*

@@ -1,0 +1,52 @@
+<div *ngIf="jobsValue">
+  <p-dataTable #jobsDataTable [value]="jobsValue.data"
+               [responsive]="true"
+               [rows]="5"
+               [paginator]="true"
+               [pageLinks]="5"
+               [rowsPerPageOptions]="[5,10,20]"
+               [expandableRows]="true"
+               [expandedRows]="expandedItems">
+    <p-header>{{listTitle}}</p-header>
+    <p-column expander="true" styleClass="col-icon"></p-column>
+    <p-column field="StartProcTime" header="Start Time"></p-column>
+    <p-column field="Experiment" header="Experiment"></p-column>
+    <p-column field="DataPath" header="Path"></p-column>
+    <p-column field="Status" header="Status">
+      <ng-template let-col let-job="rowData" pTemplate="body">
+        {{getStatusString(job[col.field])}}
+      </ng-template>
+    </p-column>
+    <p-column header="Analysis">
+      <ng-template let-job="rowData" pTemplate="body">
+        {{getAnalysisString(job)}}
+      </ng-template>
+    </p-column>
+
+    <ng-template let-job pTemplate="rowexpansion">
+      <div class="ui-g">
+        <div class="ui-g-6">
+          <p-panel header="Job Details">
+            <ng-template ngFor let-key [ngForOf]="jobKeys">
+              <div class="ui-g">
+                <div class="ui-g-2">{{key}}:</div>
+                <div class="ui-g-6">{{job[key]}}</div>
+              </div>
+            </ng-template>
+          </p-panel>
+        </div>
+        <div class="ui-g-6">
+          <p-panel header="Arguments">
+            <ng-template ngFor let-key [ngForOf]="getKeys(job.Args)">
+              <div class="ui-g">
+                <div class="ui-g-2">{{key}}:</div>
+                <div class="ui-g-6">{{job.Args[key]}}</div>
+              </div>
+            </ng-template>
+
+          </p-panel>
+        </div>
+      </div>
+    </ng-template>
+  </p-dataTable>
+</div>

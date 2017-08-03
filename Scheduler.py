@@ -125,6 +125,22 @@ class Scheduler(RestBase):
 			}
 		}
 
+		self.devMode = settings.getSettingAsBoolean(Settings.SECTION_SERVER, Settings.SERVER_DEVELOPER_MODE)
+		if (self.devMode):
+			self.__appendDeveloperHeaders(self.conf['/'])
+			self.__appendDeveloperHeaders(self.conf['/process_node'])
+			self.__appendDeveloperHeaders(self.conf['/job'])
+
+	def __appendDeveloperHeaders(self, configurationSection):
+		headersKey = 'tools.response_headers.headers'
+		if headersKey not in configurationSection:
+			configurationSection[headersKey] = []
+			configurationSection['tools.response_headers.on'] = True,
+
+		configurationSection[headersKey].append(("Access-Control-Allow-Origin", 'http://localhost:4200'))
+
+
+
 	def send_job_to_process_node(self, job, p_node):
 		url = 'http://' + str(p_node[Constants.PROCESS_NODE_HOSTNAME]) + ':' + str(p_node[Constants.PROCESS_NODE_PORT]) + '/job_queue'
 		self.logger.info('sending job to %s, url: %s', p_node[Constants.PROCESS_NODE_COMPUTERNAME], url)
@@ -324,7 +340,7 @@ class Scheduler(RestBase):
 		db.reset_process_nodes_status()
 		webapp = SchedulerHandler(db, self.all_settings)
 		webapp.process_node = SchedulerProcessNodeWebService(db)
-		webapp.job = SchedulerJobsWebService(db)
+		webapp.job = SchedulerJobsWebService(db, self.devMode)
 		app = cherrypy.tree.mount(webapp, '/', self.conf)
 		#self._setup_logging_(app.log, "rot_error_file", "logs/scheduler_error.log")
 		#self._setup_logging_(app.log, "rot_access_file", "logs/scheduler_access.log")
