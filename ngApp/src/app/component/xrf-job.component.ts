@@ -12,6 +12,7 @@ import {Job} from "../service/model/Job";
 import {SelectItem, Message} from "primeng/primeng";
 import {MapsArgs} from "../service/model/jobArgs/MapsArgs";
 import {GrowlService} from "../service/Growl.service";
+import { EmailInputComponent } from "./widgets/email-input.component"
 
 const XFM0: string = "production";
 const XFM0_DATA2: string = "verify";
@@ -45,9 +46,7 @@ const EXPERIMENT_OPTIONS = [{label: MAPSPY_EXPERIMENT_NAME, value: MAPSPY_EXPERI
 
 @Component({
   selector: 'xrf-job',
-  templateUrl: './xrf-job.component.html',
-  encapsulation: ViewEncapsulation.None,
-  styleUrls: [ 'xrf-job.component.css' ]
+  templateUrl: './xrf-job.component.html'
 })
 
 export class XrfJobComponent {
@@ -73,7 +72,6 @@ export class XrfJobComponent {
 
   constructor(private schedulerService: SchedulerService, private growlService: GrowlService) {
     this.growlMessages = [];
-    this.emailAddresses = [];
     this.mapsJobArguments = new MapsArgs;
     this.mapsJob = new Job;
     delete this.mapsJob.Id;
@@ -115,13 +113,7 @@ export class XrfJobComponent {
 
     this.mapsJob.Args = this.mapsJobArguments;
     this.mapsJobArguments.ProcMask = procMask;
-    this.mapsJob.Emails = "";
-    for (let email of this.emailAddresses) {
-      if (this.mapsJob.Emails != "") {
-        this.mapsJob.Emails += ", ";
-      }
-      this.mapsJob.Emails += email.value;
-    }
+    this.mapsJob.Emails = EmailInputComponent.getEmailCSV(this.emailAddresses);
 
     this.mapsJob.IsConcurrent = this.mapsJobArguments.Is_Live_Job;
     this.mapsJobArguments.XANES_Scan = this.isXrfJob() ? 1 : 0;
@@ -248,12 +240,8 @@ export class XrfJobComponent {
     return result;
   }
 
-  addNewEmail() {
-    this.emailAddresses.push({value: ""});
-  }
-
-  removeEmail(index: number) {
-    this.emailAddresses.splice(index, 1);
+  emailAddressChange(event) {
+    this.emailAddresses = event;
   }
 
   get EXPERIMENT_OPTIONS(): any {
