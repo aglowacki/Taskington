@@ -1,0 +1,19 @@
+Job Path: <input type="text" pInputText [(ngModel)]="dataPath">
+<div *ngFor="let option of jobPathOptionsItemList"
+     class="inlineDiv">
+  <button type="button" (click)="showDirectoryDialog(option.serviceRequest)" pButton icon="fa-search" label="{{option.displayPrompt}}"></button>
+</div>
+
+<p-dialog header="Browse directories" [(visible)]="displayDirectorySelectionDialog"
+          modal="modal">
+  <div class="jobPathSelectionTreeContainer">
+    <p-tree [value]="directorySelectionTree"
+            selectionMode="single"
+            [(selection)]="selectedDirectory" >
+    </p-tree>
+  </div>
+  <p-footer>
+    <button type="button" pButton icon="fa-check" (click)="makeDirectorySelection()" label="Select"></button>
+    <button type="button" pButton icon="fa-close" (click)="displayDirectorySelectionDialog=false" label="Close"></button>
+  </p-footer>
+</p-dialog>
