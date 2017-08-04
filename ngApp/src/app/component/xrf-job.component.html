@@ -1,7 +1,6 @@
-Job Path: <input type="text" pInputText [(ngModel)]="mapsJob.DataPath">
-<button type="button" (click)="showXfm0DirectoryDialog()" pButton icon="fa-search" label="xfm0"></button>
-<button type="button" (click)="showXfm0Data2DirectoryDialog()" pButton icon="fa-search" label="xfm0-data2"></button>
-<button type="button" (click)="showCNMDirectoryDialog()" pButton icon="fa-search" label="CNM"></button>
+<job-path-input [jobPathOptionsItemList]="jobPathOptionsItemList"
+                [defaultDataPath]="mapsJob.DataPath"
+                (dataPathChange)="dataPathChange($event)"></job-path-input>
 
 <br/>
 <p-checkbox [(ngModel)]="allDatasets"></p-checkbox>All Datasets
@@ -70,18 +69,3 @@ Job Path: <input type="text" pInputText [(ngModel)]="mapsJob.DataPath">
 
 <br/>
 <button type="button" (click)="submitJob()" pButton icon="fa-check" label="Submit Job"></button>
-
-<p-dialog header="Browse directories" [(visible)]="displayDirectorySelectionDialog"
-          modal="modal">
-  <div class="jobPathSelectionTreeContainer">
-    <p-tree [value]="directorySelectionTree"
-            selectionMode="single"
-            [(selection)]="selectedDirectory" >
-
-    </p-tree>
-  </div>
-  <p-footer>
-    <button type="button" pButton icon="fa-check" (click)="makeDirectorySelection()" label="Select"></button>
-    <button type="button" pButton icon="fa-close" (click)="displayDirectorySelectionDialog=false" label="Close"></button>
-  </p-footer>
-</p-dialog>
