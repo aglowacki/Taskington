@@ -6,7 +6,7 @@ import {Jobs} from "../service/model/Jobs";
 import {Job} from "../service/model/Job";
 import {MapsArgs} from "../service/model/jobArgs/MapsArgs";
 import {PtycholibArgs} from "../service/model/jobArgs/PtycholibArgs";
-import {MapsUtil} from "../utilities/mapsUtil";
+import {MapsUtil} from "../utility/mapsUtil";
 
 @Component({
   selector: 'job-list',

@@ -1,10 +1,8 @@
 import {Component, ViewEncapsulation} from '@angular/core';
-import {SchedulerService} from "./service/Scheduler.service";
-import {GrowlService} from "./service/Growl.service";
+import {SchedulerService, GrowlService} from "./service/services";
 import {ProcessNodes} from "./service/model/ProcessNodes";
 import {Observable} from "rxjs";
 import {Jobs} from "./service/model/Jobs";
-import {Message} from "primeng/primeng";
 
 @Component({
   selector: 'app-root',
