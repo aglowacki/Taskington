@@ -11,8 +11,11 @@
   <p-tabPanel header="Status">
     <div *ngIf="processNodes">
       <p-dataTable [value]="processNodes.data"
-                   [responsive]="true">
+                   [responsive]="true"
+                   [expandableRows]="true"
+                   [expandedRows]="expandedNodes">
         <p-header>List of Process Nodes</p-header>
+        <p-column expander="true" styleClass="col-icon"></p-column>
         <p-column field="ComputerName" header="Computer Name"></p-column>
         <p-column field="Status" header="Status"></p-column>
         <p-column field="NumThreads" header="Max Threads"></p-column>
@@ -21,6 +24,16 @@
         <p-column field="SystemSwapPercent" header="Swap Usage %"></p-column>
         <p-column field="Heartbeat" header="Heartbeat"></p-column>
         <p-column field="SupportedSoftware" header="Software"></p-column>
+        <ng-template let-node pTemplate="rowexpansion">
+          <p-panel header="Node Details">
+            <ng-template ngFor let-key [ngForOf]="nodeKeys">
+              <div class="ui-g">
+                <div class="ui-g-2">{{key}}:</div>
+                <div class="ui-g-6">{{node[key]}}</div>
+              </div>
+            </ng-template>
+          </p-panel>
+        </ng-template>
       </p-dataTable>
     </div>
 
@@ -42,6 +55,11 @@
   <p-tabPanel header="Submit XRF Job"
               lazy="true">
     <xrf-job></xrf-job>
+  </p-tabPanel>
+
+  <p-tabPanel header="Submit Ptychography Job"
+              lazy="true">
+    <ptychography-job></ptychography-job>
   </p-tabPanel>
 
 </p-tabView>
