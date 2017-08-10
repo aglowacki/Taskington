@@ -6,7 +6,7 @@ import {ProcessNode, Job, MapsArgs} from "../service/model/models";
 import { EmailInputComponent } from "./widget/widgets"
 import {GrowlService, SchedulerService} from "../service/services";
 import {MapsProcValues} from "../utility/model/mapsProcValues";
-import {MapsUtil} from "../utility/mapsUtil";
+import {MapsUtil,BooleanUtil} from "../utility/utilities";
 import {SelectItem, Message} from "primeng/primeng";
 import {JobPathOptionsItem} from "./widget/job-path-input.component";
 
@@ -141,35 +141,27 @@ export class XrfJobComponent {
     return this.mapsJob.Experiment == XRF_MAPS_EXPERIMENT_NAME;
   }
 
-  private convertNumToBoolean(num: number): boolean {
-    return num == 1 ? true : false;
-  }
-
-  private convertBooleanToNum(bool: boolean): number {
-    return bool ? 1 : 0;
-  }
-
   get is_live_job(): boolean {
-    return this.convertNumToBoolean(this.mapsJobArguments.Is_Live_Job);
+    return BooleanUtil.convertNumToBoolean(this.mapsJobArguments.Is_Live_Job);
   }
 
   set is_live_job(bool: boolean) {
-    this.mapsJobArguments.Is_Live_Job = this.convertBooleanToNum(bool);
+    this.mapsJobArguments.Is_Live_Job = BooleanUtil.convertBooleanToNum(bool);
   }
 
   get NNLS(): boolean {
-    return this.convertNumToBoolean(this.mapsJobArguments.NNLS);
+    return BooleanUtil.convertNumToBoolean(this.mapsJobArguments.NNLS);
   }
 
   set NNLS(bool: boolean) {
-    this.mapsJobArguments.NNLS = this.convertBooleanToNum(bool);
+    this.mapsJobArguments.NNLS = BooleanUtil.convertBooleanToNum(bool);
   }
 
   get QuickAndDirty(): boolean {
-    return this.convertNumToBoolean(this.mapsJobArguments.QuickAndDirty);
+    return BooleanUtil.convertNumToBoolean(this.mapsJobArguments.QuickAndDirty);
   }
 
   set QuickAndDirty(bool: boolean) {
-    this.mapsJobArguments.QuickAndDirty = this.convertBooleanToNum(bool);
+    this.mapsJobArguments.QuickAndDirty = BooleanUtil.convertBooleanToNum(bool);
   }
 }
