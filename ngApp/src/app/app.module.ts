@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core';
 import { HttpModule, JsonpModule } from "@angular/http";
 
 import { AppComponent } from './app.component';
-import { JobListComponent, XrfJobComponent } from './component/components';
+import { JobListComponent, XrfJobComponent, PtychographyJobComponent } from './component/components';
 import { GrowlService, SchedulerService } from "./service/services"
 import { EmailInputComponent, JobPathInputComponent } from "./component/widget/widgets"
 
@@ -20,7 +20,8 @@ import { FormsModule } from "@angular/forms";
     JobListComponent,
     XrfJobComponent,
     EmailInputComponent,
-    JobPathInputComponent
+    JobPathInputComponent,
+    PtychographyJobComponent
   ],
   imports: [
     BrowserModule,
