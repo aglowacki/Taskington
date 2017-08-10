@@ -20,13 +20,24 @@ export class JobPathInputComponent {
   directories: Directory[];
   directorySelectionTree: TreeNode[];
   selectedDirectory: TreeNode;
+  private _allDatasets: boolean;
 
   private _dataPath: string;
   @Input() jobPathOptionsItemList: JobPathOptionsItem[];
   @Output() dataPathChange: EventEmitter<string> = new EventEmitter<string>();
+  @Output() allDatasetsChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   constructor(private schedulerService: SchedulerService) {
 
+  }
+
+  get allDatasets(): boolean {
+    return this._allDatasets;
+  }
+
+  set allDatasets(value: boolean) {
+    this.allDatasetsChange.emit(value);
+    this._allDatasets = value;
   }
 
   get dataPath(): string {

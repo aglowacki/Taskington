@@ -4,6 +4,9 @@ Job Path: <input type="text" pInputText [(ngModel)]="dataPath">
   <button type="button" (click)="showDirectoryDialog(option.serviceRequest)" pButton icon="fa-search" label="{{option.displayPrompt}}"></button>
 </div>
 
+<br/>
+<p-checkbox [(ngModel)]="allDatasets"></p-checkbox>All Datasets
+
 <p-dialog header="Browse directories" [(visible)]="displayDirectorySelectionDialog"
           modal="modal">
   <div class="jobPathSelectionTreeContainer">
