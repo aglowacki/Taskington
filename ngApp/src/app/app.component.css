@@ -1,3 +1,87 @@
 .ui-datatable td {
   word-wrap: break-word;
 }
+
+.content-left {
+  float: left;
+  margin-left: 25px;
+
+}
+
+.content-center {
+  margin-left: 170px;
+  margin-right: 170px;
+}
+
+.content-right {
+  float:right;
+  margin-right: 25px;
+}
+
+.content-left img {
+  max-width: 100%;
+  align-self: center;
+}
+
+.content-side {
+  width: 170px;
+  height: 100%;
+  vertical-align: middle;
+  display: flex;
+  text-align: center;
+}
+
+header {
+  margin-top: 0px;
+  position: relative;
+  color: #004d99;
+  padding: 15px;
+  margin: 0px 0px 0px 0px;
+  height: 75px;
+  text-align: center;
+}
+
+.title-gradient, .ui-tabview .ui-tabview-nav {
+  background: linear-gradient(to right, #ecf2f9, #c6d9ec, #79a6d2, #79a6d2);
+  border-bottom: 1px solid #004d99;
+}
+
+.ui-tabview-nav.ui-corner-all {
+  border-radius: 0px;
+}
+
+.ui-tabview {
+  padding: 0px;
+}
+
+footer {
+  height: 70px;
+  text-align: center;
+  border-top: 1px solid #004d99;
+  padding-top: 5px;
+}
+
+.footer-contents {
+  height: 50px;
+}
+
+.footer-contents img {
+  max-height: 100%;
+}
+
+body {
+  margin:0px;
+  background: #f7ffff;
+}
+
+.ui-tabview .ui-tabview-panels.ui-widget-content, .ui-tabview {
+  background: transparent;
+}
+
+.ui-datatable tbody > tr.ui-widget-content.ui-datatable-odd {
+  background: #f2f2f2;
+}
+
+.ui-datatable tbody > tr.ui-widget-content.ui-datatable-even {
+  background: #edf2f7;
+}

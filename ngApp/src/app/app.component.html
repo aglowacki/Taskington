@@ -1,28 +1,28 @@
 <p-growl [(value)]="growlService.messages" immutable="true"></p-growl>
 
-<!--The whole content below can be removed with the new code.-->
-<div style="text-align:center">
-  <h1>
-    Welcome to {{title}}!!
-  </h1>
-</div>
+<header class="title-gradient">
+  <div class="content-left content-side">
+    <img src="../assets/anl_logo_new.min.png"/>
+  </div>
+
+
+  <div>
+  <div class="content-right content-side">
+
+  </div>
+
+  <div class="content-center">
+    <h1>
+      {{title}}
+    </h1>
+  </div>
+
+  </div>
+</header>
 
 <p-tabView>
   <p-tabPanel header="Status">
-    <div *ngIf="processNodes">
-      <p-dataTable [value]="processNodes.data"
-                   [responsive]="true">
-        <p-header>List of Process Nodes</p-header>
-        <p-column field="ComputerName" header="Computer Name"></p-column>
-        <p-column field="Status" header="Status"></p-column>
-        <p-column field="NumThreads" header="Max Threads"></p-column>
-        <p-column field="SystemCpuPercent" header="CPU Usage %"></p-column>
-        <p-column field="SystemMemPercent" header="Memory Usage %"></p-column>
-        <p-column field="SystemSwapPercent" header="Swap Usage %"></p-column>
-        <p-column field="Heartbeat" header="Heartbeat"></p-column>
-        <p-column field="SupportedSoftware" header="Software"></p-column>
-      </p-dataTable>
-    </div>
+    <process-nodes></process-nodes>
 
     <br/>
 
@@ -44,4 +44,16 @@
     <xrf-job></xrf-job>
   </p-tabPanel>
 
+  <p-tabPanel header="Submit Ptychography Job"
+              lazy="true">
+    <ptychography-job></ptychography-job>
+  </p-tabPanel>
+
 </p-tabView>
+
+<footer>
+  <div class="footer-contents">
+    <img src="./assets/doe_sc_logo.png" />
+  </div>
+
+</footer>

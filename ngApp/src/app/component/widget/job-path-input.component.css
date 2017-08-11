@@ -5,3 +5,7 @@
 .jobPathSelectionTreeContainer {
   max-height: 500px;
 }
+
+.inlineDiv {
+  display: inline;
+}

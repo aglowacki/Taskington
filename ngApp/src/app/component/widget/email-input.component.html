@@ -1,0 +1,18 @@
+<div class="ui-g">
+  <div class="ui-g-2">Email Address for completion notification:</div>
+  <div class="ui-g-2">
+    <div class="ui-g-2">
+      <button type="button" (click)="addNewEmail()" pButton icon="fa-plus"></button>
+    </div>
+    <div class="ui-g-10">
+      <div *ngFor="let email of emailAddresses; let i = index;">
+        <div class="ui-g-11">
+          <input type="text" name="emailInput-{{i}}" pInputText [(ngModel)]="emailAddresses[i].value">
+        </div>
+        <div class="ui-g-1">
+          <button type="button" (click)="removeEmail(i)" pButton icon="fa-minus" class="ui-button-danger"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

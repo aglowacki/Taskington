@@ -19,13 +19,13 @@ export class Job {
 
   constructor() {
     this.Args = undefined;
-    this.Id = 0;
+    this.Id = null;
     this.BeamLine = "";
     this.Status = 0;
     this.StartProcTime = 0;
     this.FinishProcTime = 0;
     this.Version = "";
-    this.Process_Node_Id = 0;
+    this.Process_Node_Id = -1;
     this.DatasetFilesToProc = "";
     this.DataPath = "";
     this.Emails = "";
