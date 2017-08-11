@@ -4,3 +4,4 @@
 export { JobListComponent } from './job-list.component';
 export { XrfJobComponent } from './xrf-job.component';
 export { PtychographyJobComponent } from './ptychography-job.component';
+export { ProcessNodesComponent } from './process-nodes.component'
