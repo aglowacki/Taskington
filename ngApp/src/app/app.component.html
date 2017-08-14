@@ -1,4 +1,5 @@
 <p-growl [(value)]="growlService.messages" immutable="true"></p-growl>
+<p-confirmDialog></p-confirmDialog>
 
 <header class="title-gradient">
   <div class="content-left content-side">
@@ -37,7 +38,8 @@
     <br/>
 
     <job-list [jobsValue]="finishedJobs"
-              [listTitle]="'Finished Jobs'"></job-list>
+              [listTitle]="'Finished Jobs'"
+              [displayCancelJob]="false"></job-list>
   </p-tabPanel>
   <p-tabPanel header="Submit XRF Job"
               lazy="true">
