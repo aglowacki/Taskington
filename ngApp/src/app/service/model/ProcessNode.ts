@@ -2,7 +2,7 @@
  * Created by djarosz on 6/29/17.
  */
 export class ProcessNode {
-  Status: string;
+  Status: number;
   ComputerName: string;
   NumThreads: number;
   SupportedSoftware: string[];
@@ -17,7 +17,7 @@ export class ProcessNode {
   Id: number;
 
   constructor() {
-    this.Status = "";
+    this.Status = -1;
     this.ComputerName = "";
     this.NumThreads = 0;
     this.SupportedSoftware = [];
