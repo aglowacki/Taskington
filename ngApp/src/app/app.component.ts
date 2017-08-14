@@ -9,7 +9,7 @@ import {Jobs} from "./service/model/Jobs";
   encapsulation: ViewEncapsulation.None,
   styleUrls: [
     '../../node_modules/font-awesome/css/font-awesome.css',
-    '../../node_modules/primeng/resources/themes/cupertino/theme.css',
+    '../../node_modules/primeng/resources/themes/omega/theme.css',
     '../../node_modules/primeng/resources/primeng.min.css',
     'app.component.css'
   ]
