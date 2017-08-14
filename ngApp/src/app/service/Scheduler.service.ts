@@ -28,14 +28,28 @@ export class SchedulerService {
   }
 
   submitJob(job: Job): Observable<string> {
-    let headers = new Headers({ 'Content-Type': 'application/json' });
-    let options = new RequestOptions({ headers: headers });
-    return this.http.post(this.host + "/job", job, options)
+    return this.http.post(this.host + "/job", job, this.getStandardOptions())
       .map(res => res.text())
       .catch(err => {
         console.error(err);
         return Observable.throw(err);
       });
+  }
+
+  cancelJob(job: Job): Observable<string> {
+    let options = this.getStandardOptions();
+    options.body = job;
+    return this.http.delete(this.host + "/job", options)
+      .map(response => response.text())
+      .catch(err => {
+        console.error(err);
+        return Observable.throw(err);
+      });
+  }
+
+  private getStandardOptions():RequestOptions {
+    let headers = new Headers({ 'Content-Type': 'application/json' });
+    return new RequestOptions({ headers: headers });
   }
 
   getUnprocessedJobs(): Observable<Jobs> {
