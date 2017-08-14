@@ -6,11 +6,27 @@
     <p-header>List of Process Nodes</p-header>
     <p-column expander="true" styleClass="col-icon"></p-column>
     <p-column field="ComputerName" header="Computer Name"></p-column>
-    <p-column field="Status" header="Status"></p-column>
+    <p-column field="Status" header="Status">
+      <ng-template let-col let-node="rowData" pTemplate="body" class="()">
+        <span class="{{getStyleForStatus(node[col.field])}}">{{node[col.field]}}</span>
+      </ng-template>
+    </p-column>
     <p-column field="NumThreads" header="Max Threads"></p-column>
-    <p-column field="SystemCpuPercent" header="CPU Usage %"></p-column>
-    <p-column field="SystemMemPercent" header="Memory Usage %"></p-column>
-    <p-column field="SystemSwapPercent" header="Swap Usage %"></p-column>
+    <p-column field="SystemCpuPercent" header="CPU Usage %">
+      <ng-template let-col let-node="rowData" pTemplate="body" class="()">
+        <span class="{{getStyleForPercentage(node[col.field])}}">{{node[col.field]}}</span>
+      </ng-template>
+    </p-column>
+    <p-column field="SystemMemPercent" header="Memory Usage %">
+      <ng-template let-col let-node="rowData" pTemplate="body" class="()">
+        <span class="{{getStyleForPercentage(node[col.field])}}">{{node[col.field]}}</span>
+      </ng-template>
+    </p-column>
+    <p-column field="SystemSwapPercent" header="Swap Usage %">
+      <ng-template let-col let-node="rowData" pTemplate="body" class="()">
+        <span class="{{getStyleForPercentage(node[col.field])}}">{{node[col.field]}}</span>
+      </ng-template>
+    </p-column>
     <p-column field="Heartbeat" header="Heartbeat"></p-column>
     <p-column field="SupportedSoftware" header="Software"></p-column>
     <ng-template let-node pTemplate="rowexpansion">

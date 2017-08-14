@@ -6,6 +6,11 @@ import {SchedulerService} from "../service/services";
 import {Component} from "@angular/core";
 import {ProcessNodes, ProcessNode} from "../service/model/models";
 import {Observable} from "rxjs";
+import {StylesConstants} from "../constants/styles.constants";
+
+const PROCESSING_STATUS: string = "Processing";
+const IDLE_STATUS: string = "Idle";
+const OFFLINE_STATUS: string = "OFFLINE";
 
 @Component({
   selector: 'process-nodes',
@@ -49,6 +54,26 @@ export class ProcessNodesComponent {
       this._nodeKeys = Object.keys(new ProcessNode());
     }
     return this._nodeKeys;
+  }
+
+  getStyleForPercentage(percentageValue: number): string {
+    if (percentageValue < 26) {
+      return StylesConstants.GOOD_COLUMN_DATA_SPAN;
+    }
+    if (percentageValue < 66) {
+      return StylesConstants.WARNING_COLUMN_DATA_SPAN
+    }
+    return StylesConstants.ALERT_COLUMN_DATA_SPAN;
+  }
+
+  getStyleForStatus(status: string): string {
+    if (IDLE_STATUS == status) {
+      return StylesConstants.GOOD_COLUMN_DATA_SPAN;
+    }
+    if (PROCESSING_STATUS == status) {
+      return StylesConstants.WARNING_COLUMN_DATA_SPAN;
+    }
+    return StylesConstants.ALERT_COLUMN_DATA_SPAN;
   }
 
 }
