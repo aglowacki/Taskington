@@ -7,6 +7,10 @@ import {Job} from "../service/model/Job";
 import {MapsArgs} from "../service/model/jobArgs/MapsArgs";
 import {PtycholibArgs} from "../service/model/jobArgs/PtycholibArgs";
 import {MapsUtil} from "../utility/mapsUtil";
+import {StylesConstants} from "../constants/styles.constants";
+import {ProcessNode} from "../service/model/ProcessNode";
+import {GrowlService,SchedulerService} from '../service/services'
+import {ConfirmationService} from "primeng/primeng";
 
 @Component({
   selector: 'job-list',
@@ -17,9 +21,16 @@ export class JobListComponent implements OnChanges {
   @Input() listTitle: string;
   private _expandedItems: Job[];
   private _jobKeys: string[];
+  @Input() displayCancelJob: boolean;
 
-  constructor() {
+  constructor(private growlService: GrowlService,
+              private schedulerService: SchedulerService,
+              private confirmationService: ConfirmationService) {
     this._expandedItems = [];
+
+    if (this.displayCancelJob == null) {
+      this.displayCancelJob = true;
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -82,6 +93,30 @@ export class JobListComponent implements OnChanges {
       default:
         return "Error Occurred";
     }
+  }
+
+  getStatusRowSyle(row_data: ProcessNode): string {
+    if (row_data.Status > 2 && row_data.Status <= 4) {
+      return StylesConstants.WARNING_DATA_ROW;
+    }
+    if (row_data.Status > 4) {
+      return StylesConstants.ALERT_DATA_ROW;
+    }
+
+    return "";
+  }
+
+  cancelJob(job: Job) {
+    this.confirmationService.confirm({
+      message: 'Are you sure that you want to cancel this job?',
+      header: "Cancel Job: " + job.Id,
+      icon: 'fa fa-hand-paper-o',
+      accept: () => {
+        this.schedulerService.cancelJob(job).subscribe(res => {
+          this.growlService.addSuccessMessage("Cancelled", res);
+        });
+      }
+    })
   }
 
   getAnalysisString(job: Job): string {

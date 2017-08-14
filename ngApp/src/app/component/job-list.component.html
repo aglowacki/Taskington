@@ -6,7 +6,8 @@
                [pageLinks]="5"
                [rowsPerPageOptions]="[5,10,20]"
                [expandableRows]="true"
-               [expandedRows]="expandedItems">
+               [expandedRows]="expandedItems"
+               [rowStyleClass]="getStatusRowSyle">
     <p-header>{{listTitle}}</p-header>
     <p-column expander="true" styleClass="col-icon"></p-column>
     <p-column field="StartProcTime" header="Start Time"></p-column>
@@ -20,6 +21,17 @@
     <p-column header="Analysis">
       <ng-template let-job="rowData" pTemplate="body">
         {{getAnalysisString(job)}}
+      </ng-template>
+    </p-column>
+
+    <p-column header="Actions"
+              *ngIf="displayCancelJob">
+      <ng-template let-job="rowData" pTemplate="body">
+        <button type="button"
+                pButton icon="fa-hand-paper-o"
+                class="ui-button-danger"
+                (click)="cancelJob(job)">
+        </button>
       </ng-template>
     </p-column>
 
