@@ -395,7 +395,7 @@ class SchedulerJobsWebService(object):
 		if self.devMode:
 			options_headers = cherrypy.request.headers
 			cherrypy.response.headers['Access-Control-Allow-Origin'] = options_headers['Origin']
-			cherrypy.response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT';
+			cherrypy.response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE';
 			cherrypy.response.headers['Access-Control-Allow-Headers'] = options_headers['Access-Control-Request-Headers']
 			cherrypy.response.headers['Content-Type'] = 'text/html; charset=utf-8'
 
