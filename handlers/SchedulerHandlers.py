@@ -63,8 +63,9 @@ def get_dirs(path, level):
 
 class SchedulerHandler(object):
 
-	def __init__(self, db, settings=None):
+	def __init__(self, db, devMode, settings=None):
 		self.db = db
+		self.devMode = devMode
 		self.settings = settings
 		self.api_dict = {'functions': [{'Function': 'api',
 										'Parameters': 'N/A',
@@ -218,9 +219,14 @@ class SchedulerHandler(object):
 		return jenc.encode(data_dict)
 
 	@cherrypy.expose
-	def get_mda_list(self, job_path):
-		data_dict = dict()
+	def get_mda_list(self, job_path=None):
+		if cherrypy.request.method == "OPTIONS":
+			if self.devMode:
+				SchedulerHandler.addOptionsHeaders(cherrypy)
+			return
+
 		mda_path = os.path.join(job_path, 'mda/*.mda')
+		data_dict = dict()
 		data_dict['mda_files'] = glob.glob(mda_path)
 		jenc = json.JSONEncoder()
 		return jenc.encode(data_dict)
@@ -339,6 +345,14 @@ class SchedulerHandler(object):
 					sup_software[proc_node[Constants.PROCESS_NODE_COMPUTERNAME]] = json.loads(result.text)
 		return jenc.encode(sup_software)
 
+	@staticmethod
+	def addOptionsHeaders(cherrypy):
+		options_headers = cherrypy.request.headers
+		cherrypy.response.headers['Access-Control-Allow-Origin'] = options_headers['Origin']
+		cherrypy.response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE';
+		cherrypy.response.headers['Access-Control-Allow-Headers'] = options_headers['Access-Control-Request-Headers']
+		cherrypy.response.headers['Content-Type'] = 'text/html; charset=utf-8'
+
 
 class SchedulerJobsWebService(object):
 	'''
@@ -393,11 +407,7 @@ class SchedulerJobsWebService(object):
 
 	def OPTIONS(self):
 		if self.devMode:
-			options_headers = cherrypy.request.headers
-			cherrypy.response.headers['Access-Control-Allow-Origin'] = options_headers['Origin']
-			cherrypy.response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE';
-			cherrypy.response.headers['Access-Control-Allow-Headers'] = options_headers['Access-Control-Request-Headers']
-			cherrypy.response.headers['Content-Type'] = 'text/html; charset=utf-8'
+			SchedulerHandler.addOptionsHeaders(cherrypy)
 
 
 class SchedulerProcessNodeWebService(object):

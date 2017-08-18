@@ -338,7 +338,7 @@ class Scheduler(RestBase):
 		db.subscribe()
 		db.create_tables()
 		db.reset_process_nodes_status()
-		webapp = SchedulerHandler(db, self.all_settings)
+		webapp = SchedulerHandler(db, self.devMode, self.all_settings)
 		webapp.process_node = SchedulerProcessNodeWebService(db)
 		webapp.job = SchedulerJobsWebService(db, self.devMode)
 		app = cherrypy.tree.mount(webapp, '/', self.conf)
