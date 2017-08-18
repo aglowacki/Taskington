@@ -9,7 +9,7 @@ import { EmailInputComponent, JobPathInputComponent } from "./component/widget/w
 
 import { DataTableModule, PanelModule, TabViewModule, SharedModule, InputTextModule} from 'primeng/primeng'
 import { ButtonModule, DialogModule, TreeModule, CheckboxModule, SelectButtonModule } from 'primeng/primeng'
-import { DropdownModule, SpinnerModule, DataListModule, GrowlModule } from 'primeng/primeng'
+import { DropdownModule, SpinnerModule, DataListModule, GrowlModule, ListboxModule } from 'primeng/primeng'
 import {ConfirmDialogModule,ConfirmationService} from 'primeng/primeng';
 import { Angular2FontawesomeModule } from 'angular2-fontawesome/angular2-fontawesome'
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
@@ -46,7 +46,8 @@ import { FormsModule } from "@angular/forms";
     CheckboxModule,
     SharedModule,
     BrowserAnimationsModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    ListboxModule
   ],
   providers: [GrowlService, SchedulerService, ConfirmationService],
   bootstrap: [AppComponent]
