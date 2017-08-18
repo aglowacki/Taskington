@@ -1,6 +1,5 @@
 <job-path-input [jobPathOptionsItemList]="jobPathOptionsItemList"
-                [defaultDataPath]="ptyJob.DataPath"
-                (dataPathChange)="dataPathChange($event)"></job-path-input>
+                [defaultDataPath]="ptyJob.DataPath"></job-path-input>
 
 <div class="ui-g">
   <div class="ui-g-2">Calculated STXM & DPC only:</div>
@@ -85,7 +84,7 @@
   </div>
 </div>
 
-<email-input (emailChangeEvent)="emailAddressChange($event)"></email-input>
+<email-input></email-input>
 
 <br/>
 <button type="button" (click)="submitJob()" pButton icon="fa-check" label="Submit Job"></button>

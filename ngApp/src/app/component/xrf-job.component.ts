@@ -1,14 +1,14 @@
 /**
  * Created by djarosz on 7/21/17.
  */
-import {Component} from "@angular/core";
+import {Component, ViewChild} from "@angular/core";
 import {ProcessNode, Job, MapsArgs} from "../service/model/models";
 import { EmailInputComponent } from "./widget/widgets"
 import {GrowlService, SchedulerService} from "../service/services";
 import {MapsProcValues} from "../utility/model/mapsProcValues";
 import {MapsUtil,BooleanUtil} from "../utility/utilities";
 import {SelectItem, Message} from "primeng/primeng";
-import {JobPathOptionsItem} from "./widget/job-path-input.component";
+import {JobPathOptionsItem, JobPathInputComponent} from "./widget/job-path-input.component";
 
 const XFM0: string = "production";
 const XFM0_DATA2: string = "verify";
@@ -53,14 +53,13 @@ export class XrfJobComponent {
   mapsJobArguments: MapsArgs;
   mapsJob: Job;
 
-  // Need to be an object to work appropriately within ngFor input text.
-  // value accessor must be used on each item in the list.
-  emailAddresses: any[];
-
-  // TODO Map directly to job.
-  allDatasets: boolean;
-
   growlMessages: Message[];
+
+  @ViewChild(JobPathInputComponent)
+  jobPathInput: JobPathInputComponent;
+
+  @ViewChild(EmailInputComponent)
+  emailInput: EmailInputComponent;
 
 
   constructor(private schedulerService: SchedulerService, private growlService: GrowlService) {
@@ -111,7 +110,10 @@ export class XrfJobComponent {
 
     this.mapsJob.Args = this.mapsJobArguments;
     this.mapsJobArguments.ProcMask = procMask;
-    this.mapsJob.Emails = EmailInputComponent.getEmailCSV(this.emailAddresses);
+
+    this.mapsJob.Emails = this.emailInput.getEmailCSV();
+    this.mapsJob.DataPath = this.jobPathInput.dataPath;
+    this.mapsJob.DatasetFilesToProc = this.jobPathInput.getJobSubmissionDatasetsString();
 
     this.mapsJob.IsConcurrent = this.mapsJobArguments.Is_Live_Job;
     this.mapsJobArguments.XANES_Scan = this.isXrfJob() ? 1 : 0;
@@ -119,14 +121,6 @@ export class XrfJobComponent {
     this.schedulerService.submitJob(this.mapsJob).subscribe(res => {
       this.growlService.addSuccessMessage("Job Submitted", res);
     });
-  }
-
-  dataPathChange(event) {
-    this.mapsJob.DataPath = event;
-  }
-
-  emailAddressChange(event) {
-    this.emailAddresses = event;
   }
 
   get EXPERIMENT_OPTIONS(): any {

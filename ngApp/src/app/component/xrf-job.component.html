@@ -1,8 +1,5 @@
-<job-path-input [jobPathOptionsItemList]="jobPathOptionsItemList"
-                [defaultDataPath]="mapsJob.DataPath"
-                (dataPathChange)="dataPathChange($event)"></job-path-input>
-
-<br/><br/>
+<job-path-input #jobPathInput [jobPathOptionsItemList]="jobPathOptionsItemList"
+                [defaultDataPath]="mapsJob.DataPath"></job-path-input>
 
 <p-panel header="Analysis Options">
 
@@ -62,7 +59,7 @@
                                   autoWidth="false" [style]="{'width': '100%'}"></p-dropdown></div>
 </div>
 
-<email-input (emailChangeEvent)="emailAddressChange($event)"></email-input>
+<email-input></email-input>
 
 <br/>
 <button type="button" (click)="submitJob()" pButton icon="fa-check" label="Submit Job"></button>

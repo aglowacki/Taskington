@@ -1,8 +1,8 @@
 /**
  * Created by djarosz on 8/4/17.
  */
-import {Component} from "@angular/core";
-import {JobPathOptionsItem} from "./widget/job-path-input.component";
+import {Component, ViewChild} from "@angular/core";
+import {JobPathOptionsItem, JobPathInputComponent} from "./widget/job-path-input.component";
 import {Job} from "../service/model/Job";
 import {PtycholibArgs} from "../service/model/jobArgs/PtycholibArgs";
 import {BooleanUtil} from "../utility/utilities";
@@ -54,11 +54,16 @@ const GPU_OPTIONS: any[] = [{value: 0, label: 'Tesla K40c'},
 
 export class PtychographyJobComponent {
   jobPathOptionsItemList: JobPathOptionsItem[];
-  emailAddresses: any[];
   processNodesSelectOptions: SelectItem[];
 
   ptyJob: Job;
   ptyJobArgs: PtycholibArgs;
+
+  @ViewChild(JobPathInputComponent)
+  jobPathInput: JobPathInputComponent;
+
+  @ViewChild(EmailInputComponent)
+  emailInput: EmailInputComponent;
 
   constructor(private schedulerService: SchedulerService, private growlService: GrowlService) {
     this.jobPathOptionsItemList = [];
@@ -115,19 +120,14 @@ export class PtychographyJobComponent {
 
   submitJob() {
       this.ptyJob.Args = this.ptyJobArgs;
-      this.ptyJob.Emails = EmailInputComponent.getEmailCSV(this.emailAddresses);
+
+      this.ptyJob.Emails = this.emailInput.getEmailCSV();
+      this.ptyJob.DataPath = this.jobPathInput.dataPath;
+      this.ptyJob.DatasetFilesToProc = this.jobPathInput.getJobSubmissionDatasetsString();
 
       this.schedulerService.submitJob(this.ptyJob).subscribe(res => {
         this.growlService.addSuccessMessage("Job Submitted", res);
       });
-  }
-
-  dataPathChange(dataPathEvent) {
-    this.ptyJob.DataPath = dataPathEvent;
-  }
-
-  emailAddressChange(emailAddressEvent) {
-    this.emailAddresses = emailAddressEvent;
   }
 
   get gpuOptions(): any[] {
