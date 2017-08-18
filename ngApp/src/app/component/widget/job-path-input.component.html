@@ -1,11 +1,32 @@
-Job Path: <input type="text" pInputText [(ngModel)]="dataPath">
-<div *ngFor="let option of jobPathOptionsItemList"
-     class="inlineDiv">
-  <button type="button" (click)="showDirectoryDialog(option.serviceRequest)" pButton icon="fa-search" label="{{option.displayPrompt}}"></button>
+<div class="ui-g">
+  <div class="ui-g-2">Job Path:</div>
+  <div class="ui-g-10">
+    <input type="text" class="fullWidth" pInputText [(ngModel)]="dataPath">
+  </div>
 </div>
 
-<br/>
-<p-checkbox [(ngModel)]="allDatasets"></p-checkbox>All Datasets
+<div class="ui-g">
+  <div class="ui-g-2">Browse:</div>
+  <div class="ui-g-10">
+    <div *ngFor="let option of jobPathOptionsItemList"
+         class="inlineDiv">
+      <button type="button" (click)="showDirectoryDialog(option.serviceRequest)" pButton icon="fa-search" label="{{option.displayPrompt}}"></button>
+    </div>
+  </div>
+</div>
+
+<div class="ui-g" *ngIf="datasetSelectionList != null">
+  <div class="ui-g-2">Datasets:</div>
+  <div class="ui-g-10">
+    <p-listbox [options]="datasetSelectionList"
+               [(ngModel)]="selectedDatasets"
+               multiple="multiple"
+               checkbox="checkbox"
+               filter="filter"
+               [style]="{'width':'100%','max-height':'125px'}">
+    </p-listbox>
+  </div>
+</div>
 
 <p-dialog header="Browse directories" [(visible)]="displayDirectorySelectionDialog"
           modal="modal">

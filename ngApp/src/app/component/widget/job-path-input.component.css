@@ -6,6 +6,10 @@
   max-height: 500px;
 }
 
+.fullWidth {
+  width: 100%;
+}
+
 .inlineDiv {
   display: inline;
 }
