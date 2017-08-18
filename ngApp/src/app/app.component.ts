@@ -34,15 +34,18 @@ export class AppComponent {
 
   private loadJobs() {
     this.schedulerService.getUnprocessedJobs().subscribe(
-      unprocessedJobs => this.queuedJobs = unprocessedJobs
+      unprocessedJobs => this.queuedJobs = unprocessedJobs,
+      error => this.queuedJobs = null
     );
 
     this.schedulerService.getFinishedJobs().subscribe(
-      finishedJobs => this.finishedJobs = finishedJobs
+      finishedJobs => this.finishedJobs = finishedJobs,
+      error => this.finishedJobs = null
     );
 
     this.schedulerService.getProcessingJobs().subscribe(
-      processingJobs => this.processingJobs = processingJobs
+      processingJobs => this.processingJobs = processingJobs,
+      error => this.processingJobs = null
     );
 
     this.schedulerService.getFinishedJobs()

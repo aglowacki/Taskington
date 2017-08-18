@@ -45,7 +45,8 @@ export class ProcessNodesComponent {
           }
         }
         this.expandedNodes = newExpandedNodes;
-      }
+      },
+      error => this.processNodes = null
     );
   }
 
