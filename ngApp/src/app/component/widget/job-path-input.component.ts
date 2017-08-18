@@ -4,7 +4,7 @@
 import {Component, ViewEncapsulation, Input, EventEmitter, Output} from "@angular/core";
 import {Directory} from "../../service/model/models";
 import {SchedulerService} from "../../service/services";
-import {TreeNode} from "primeng/primeng";
+import {TreeNode, SelectItem} from "primeng/primeng";
 
 const DIR_STRUCTURE_DEPTH = 3;
 
@@ -20,24 +20,16 @@ export class JobPathInputComponent {
   directories: Directory[];
   directorySelectionTree: TreeNode[];
   selectedDirectory: TreeNode;
-  private _allDatasets: boolean;
+  datasetSelectionList: SelectItem[];
+  selectedDatasets: string[];
 
   private _dataPath: string;
   @Input() jobPathOptionsItemList: JobPathOptionsItem[];
-  @Output() dataPathChange: EventEmitter<string> = new EventEmitter<string>();
-  @Output() allDatasetsChange: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Input() set defaultDataPath(value: string) {
+    this._dataPath = value;
+  }
 
   constructor(private schedulerService: SchedulerService) {
-
-  }
-
-  get allDatasets(): boolean {
-    return this._allDatasets;
-  }
-
-  set allDatasets(value: boolean) {
-    this.allDatasetsChange.emit(value);
-    this._allDatasets = value;
   }
 
   get dataPath(): string {
@@ -45,13 +37,53 @@ export class JobPathInputComponent {
   }
 
   set dataPath(value: string) {
-    this.dataPathChange.emit(value);
     this._dataPath = value;
+    this.datasetSelectionList = null;
+    this.loadDatasetSelectionList();
   }
 
-  @Input()
-  set defaultDataPath(value: string) {
-    this._dataPath = value;
+  getJobSubmissionDatasetsString(): string {
+    if (this.datasetSelectionList == null) {
+      // Nothing to select so use all for the current path
+      return "all";
+    }
+    if (this.datasetSelectionList.length == this.selectedDatasets.length) {
+      //All of the datasets are selected use all
+      return "all";
+    }
+
+    let result = "";
+    for (let i = 0; i < this.selectedDatasets.length; i++) {
+      result += this.selectedDatasets[i];
+      if (i != this.selectedDatasets.length -1) {
+        result += ",";
+      }
+    }
+    return result;
+  }
+
+  private loadDatasetSelectionList() {
+    if (this.datasetSelectionList == null) {
+      this.schedulerService.getMdaList(this.dataPath)
+        .subscribe(datasets => {
+          if (datasets.mda_files.length > 0) {
+            this.datasetSelectionList = [];
+            this.selectedDatasets = [];
+            for (let datasetPath of datasets.mda_files) {
+              let path_split = datasetPath.split("/");
+              let datasetName = path_split[path_split.length - 1];
+
+              let selection = {
+                label: datasetName,
+                value: datasetName
+              };
+
+              this.selectedDatasets.push(datasetName);
+              this.datasetSelectionList.push(selection);
+            }
+          }
+        })
+    }
   }
 
   showDirectoryDialog(serviceRequest: string) {
@@ -157,7 +189,6 @@ export class JobPathInputComponent {
       }
 
       jobPath += directory.text;
-      //TODO add this to the xrf-job page
       this.dataPath = jobPath;
     }
     this.displayDirectorySelectionDialog = false;
