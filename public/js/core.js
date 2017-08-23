@@ -325,7 +325,7 @@
         {
             $.ajax(
             {
-                type: 'POST',
+                type: 'GET',
                 url:"/get_mda_list",
                 data: {'job_path': $(str_datapath_id).val()},
                 datatype: "json",
@@ -575,7 +575,7 @@
                         var me = this;
                          $.ajax(
                         {
-                            type: 'POST',
+                            type: 'GET',
                             url:"/get_dataset_dirs_list",
                             data: {'job_path': 'verify', 'depth': 2},
                             datatype: "json",
@@ -609,7 +609,7 @@
                         var me = this;
                          $.ajax(
                         {
-                            type: 'POST',
+                            type: 'GET',
                             url:"/get_dataset_dirs_list",
                             data: {'job_path': 'production', 'depth': 2},
                             datatype: "json",
@@ -643,7 +643,7 @@
                         var me = this;
                          $.ajax(
                         {
-                            type: 'POST',
+                            type: 'GET',
                             url:"/get_dataset_dirs_list",
                             data: {'job_path': 'cnm', 'depth': 1},
                             datatype: "json",
@@ -677,7 +677,7 @@
                         var me = this;
                          $.ajax(
                         {
-                            type: 'POST',
+                            type: 'GET',
                             url:"/get_dataset_dirs_list",
                             data: {'job_path': 'pty', 'depth': 1},
                             datatype: "json",
