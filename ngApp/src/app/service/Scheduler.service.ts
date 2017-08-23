@@ -102,9 +102,9 @@ export class SchedulerService {
   getMdaList(jobPath: string): Observable<MdaFiles> {
     let headers = new Headers({ 'Content-Type': 'application/x-www-form-urlencoded' });
     let requestOptions: RequestOptions = new RequestOptions({ headers: headers});
-    return this.http.post(this.host + "/get_mda_list", "job_path="+jobPath, requestOptions)
+    return this.http.get(this.host + "/get_mda_list?job_path=" + jobPath, requestOptions)
       .map(res => <MdaFiles>res.json())
-      .catch(err => {``
+      .catch(err => {
         return this.processError("getting mda file list", err);
       });
   }
