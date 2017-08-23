@@ -34,7 +34,7 @@ SUCH DAMAGE.
 import os, os.path
 import Settings
 import requests
-from handlers.SchedulerHandlers import SchedulerHandler, SchedulerJobsWebService, SchedulerProcessNodeWebService
+from handlers.SchedulerHandlers import SchedulerHandler
 from plugins.DatabasePlugin import DatabasePlugin
 from plugins.SQLiteDB import SQLiteDB
 from tools import Mailman
@@ -89,55 +89,41 @@ class Scheduler(RestBase):
 			cherrypy.engine.signal_handler.subscribe()
 		self.conf = {
 			'/': {
-				'tools.sessions.on': True,
-				'tools.staticdir.root': os.path.abspath(os.getcwd())
-			},
-			'/process_node': {
-				'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
-				'tools.response_headers.on': True,
-				'tools.response_headers.headers': [('Content-Type', 'text/plain')],
-			},
-			'/job': {
-				'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
-				'tools.response_headers.on': True,
-				'tools.response_headers.headers': [('Content-Type', 'text/plain')],
-				'request.methods_with_bodies': ('POST', 'PUT', 'DELETE')
+				'tools.staticdir.root': os.path.abspath(os.getcwd()),
+				'tools.sessions.on': True
 			},
 			'/static': {
 				'tools.staticdir.on': True,
 				'tools.staticdir.dir': './public',
 				'tools.sessions.on': False,
-        		'tools.caching.on': False,
-        		'tools.caching.force' : False,
-        		'tools.caching.delay' : 0,
-        		'tools.expires.on' : False,
-        		'tools.expires.secs' : 60*24*365
+				'tools.caching.on': False,
+				'tools.caching.force': False,
+				'tools.caching.delay': 0,
+				'tools.expires.on': False,
+				'tools.expires.secs': 60 * 24 * 365
 			},
 			'/new-static': {
 				'tools.staticdir.on': True,
 				'tools.staticdir.dir': './new-public',
 				'tools.sessions.on': False,
-        		'tools.caching.on': False,
-        		'tools.caching.force' : False,
-        		'tools.caching.delay' : 0,
-        		'tools.expires.on' : False,
-        		'tools.expires.secs' : 60*24*365
+				'tools.caching.on': False,
+				'tools.caching.force': False,
+				'tools.caching.delay': 0,
+				'tools.expires.on': False,
+				'tools.expires.secs': 60 * 24 * 365
 			}
 		}
 
 		self.devMode = settings.getSettingAsBoolean(Settings.SECTION_SERVER, Settings.SERVER_DEVELOPER_MODE)
+
 		if (self.devMode):
-			self.__appendDeveloperHeaders(self.conf['/'])
-			self.__appendDeveloperHeaders(self.conf['/process_node'])
-			self.__appendDeveloperHeaders(self.conf['/job'])
+			configurationSection = self.conf['/']
+			headersKey = 'tools.response_headers.headers'
+			if headersKey not in configurationSection:
+				configurationSection[headersKey] = []
+				configurationSection['tools.response_headers.on'] = True,
 
-	def __appendDeveloperHeaders(self, configurationSection):
-		headersKey = 'tools.response_headers.headers'
-		if headersKey not in configurationSection:
-			configurationSection[headersKey] = []
-			configurationSection['tools.response_headers.on'] = True,
-
-		configurationSection[headersKey].append(("Access-Control-Allow-Origin", 'http://localhost:4200'))
+			configurationSection[headersKey].append(("Access-Control-Allow-Origin", 'http://localhost:4200'))
 
 
 
@@ -338,10 +324,15 @@ class Scheduler(RestBase):
 		db.subscribe()
 		db.create_tables()
 		db.reset_process_nodes_status()
-		webapp = SchedulerHandler(db, self.devMode, self.all_settings)
-		webapp.process_node = SchedulerProcessNodeWebService(db)
-		webapp.job = SchedulerJobsWebService(db, self.devMode)
-		app = cherrypy.tree.mount(webapp, '/', self.conf)
+
+		scheduleHandler = SchedulerHandler(db, self.devMode, self.all_settings)
+
+		dispatcher = cherrypy.dispatch.RoutesDispatcher()
+
+		self.connect_all_routes(dispatcher, scheduleHandler.get_routes())
+		self.conf['/']['request.dispatch'] = dispatcher
+		app = cherrypy.tree.mount(None, config=self.conf)
+
 		#self._setup_logging_(app.log, "rot_error_file", "logs/scheduler_error.log")
 		#self._setup_logging_(app.log, "rot_access_file", "logs/scheduler_access.log")
 		cherrypy.engine.start()

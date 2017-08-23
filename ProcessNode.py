@@ -46,7 +46,7 @@ from datetime import datetime
 from RestBase import RestBase
 from plugins.DatabasePlugin import DatabasePlugin
 from plugins.SQLiteDB import SQLiteDB
-from handlers.ProcessNodeHandlers import ProcessNodeHandler, ProcessNodeJobsWebService
+from handlers.ProcessNodeHandlers import ProcessNodeHandler
 import math
 import Constants
 import modules
@@ -83,13 +83,9 @@ class ProcessNode(RestBase):
 		self.conf = {
 			'/': {
 				'tools.sessions.on': True,
-				'tools.staticdir.root': os.path.abspath(os.getcwd())
-			},
-			'/job_queue': {
-				'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
+				'tools.staticdir.root': os.path.abspath(os.getcwd()),
 				'tools.response_headers.on': True,
 				'tools.response_headers.headers': [('Content-Type', 'text/plain')],
-				'request.methods_with_bodies': ('POST', 'PUT', 'DELETE')
 			},
 			'/static': {
 				'tools.staticdir.on': True,
@@ -181,12 +177,17 @@ class ProcessNode(RestBase):
 		return parsed_obj
 
 	def run(self):
-		webapp = ProcessNodeHandler()
-		webapp.set_software_dir(self.software_dict)
+		processNodeHandler = ProcessNodeHandler(self.db, self.logger)
+		processNodeHandler.set_software_dir(self.software_dict)
 		self.db.subscribe()
 		self.db.create_tables()
-		webapp.job_queue = ProcessNodeJobsWebService(self.db, self.logger)
-		app = cherrypy.tree.mount(webapp, '/', self.conf)
+
+		dispatcher = cherrypy.dispatch.RoutesDispatcher()
+
+		self.connect_all_routes(dispatcher, processNodeHandler.get_routes())
+		self.conf['/']['request.dispatch'] = dispatcher
+
+		app = cherrypy.tree.mount(None, config=self.conf)
 		#self._setup_logging_(app.log, "rot_error_file", "logs/" + self.pn_info[Constants.PROCESS_NODE_COMPUTERNAME] + "_error.log", False, True)
 		#self._setup_logging_(app.log, "rot_access_file", "logs/" + self.pn_info[Constants.PROCESS_NODE_COMPUTERNAME] + "_access.log", False, True)
 		cherrypy.engine.start()

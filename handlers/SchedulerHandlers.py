@@ -42,6 +42,8 @@ import requests
 import Constants
 import traceback
 
+from model.route import Route
+
 
 def gen_job_dir_dict(text, opened, children):
 	d_dict = dict()
@@ -122,6 +124,39 @@ class SchedulerHandler(object):
 										'Description': 'Get all the finished jobs'
 									   }
 									   ]}
+
+	def get_routes(self):
+		routes = [];
+		routes.append(Route('index', 'GET', self, path='/'))
+		routes.append(Route('new', 'GET', self))
+		routes.append(Route('api', 'GET', self))
+		routes.append(Route('help', 'GET', self))
+		routes.append(Route('get_software_versions', 'GET', self))
+		routes.append(Route('get_output_list', 'GET', self))
+		routes.append(Route('get_dataset_dirs_list', 'GET', self))
+		routes.append(Route('get_spectrum_image_list', 'GET', self))
+		routes.append(Route('get_mda_list', 'GET', self))
+		routes.append(Route('get_spectrum_image', 'GET', self))
+		routes.append(Route('get_spectrum_txt', 'GET', self))
+		routes.append(Route('get_all_unprocessed_jobs', 'GET', self))
+		routes.append(Route('get_all_processing_jobs', 'GET', self))
+		routes.append(Route('get_all_finished_jobs', 'GET', self))
+		routes.append(Route('get_job_dict', 'GET', self))
+
+		JOB_PATH = '/job'
+		routes.append(Route('get_jobs_list', 'GET', self, path=JOB_PATH))
+		routes.append(Route('submit_job_to_queue', 'POST', self, path=JOB_PATH))
+		routes.append(Route('update_job', 'PUT', self, path=JOB_PATH))
+		routes.append(Route('delete_job', 'DELETE', self, path=JOB_PATH))
+		routes.append(Route('job_options_request', 'OPTIONS', self, path=JOB_PATH))
+
+		NODE_PATH = '/process_node'
+		routes.append(Route('get_process_nodes', 'GET', self, path=NODE_PATH))
+		routes.append(Route('add_process_node', 'POST', self, path=NODE_PATH))
+		routes.append(Route('update_process_node', 'PUT', self, path=NODE_PATH))
+		routes.append(Route('delete_process_node', 'DELETE', self, path=NODE_PATH))
+
+		return routes;
 
 	def show_api(self):
 		ret_str = '<!DOCTYPE html><html><head></head><body><table>'
@@ -222,7 +257,7 @@ class SchedulerHandler(object):
 	def get_mda_list(self, job_path=None):
 		if cherrypy.request.method == "OPTIONS":
 			if self.devMode:
-				SchedulerHandler.addOptionsHeaders(cherrypy)
+				self.addOptionsHeaders()
 			return
 
 		mda_path = os.path.join(job_path, 'mda/*.mda')
@@ -345,40 +380,23 @@ class SchedulerHandler(object):
 					sup_software[proc_node[Constants.PROCESS_NODE_COMPUTERNAME]] = json.loads(result.text)
 		return jenc.encode(sup_software)
 
-	@staticmethod
-	def addOptionsHeaders(cherrypy):
-		options_headers = cherrypy.request.headers
-		cherrypy.response.headers['Access-Control-Allow-Origin'] = options_headers['Origin']
-		cherrypy.response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE';
-		cherrypy.response.headers['Access-Control-Allow-Headers'] = options_headers['Access-Control-Request-Headers']
-		cherrypy.response.headers['Content-Type'] = 'text/html; charset=utf-8'
-
-
-class SchedulerJobsWebService(object):
-	'''
-	Scheduler exposed /job
-	class for adding, updating, or removing jobs
-	'''
-	exposed = True
-	def __init__(self, db, devMode):
-		self.db = db
-		self.devMode = devMode
-
 	@cherrypy.tools.accept(media='text/plain')
-	#@cherrypy.tools.json_out()
+	@cherrypy.expose
+	# @cherrypy.tools.json_out()
 	# return list of jobs in queue
-	def GET(self, *args, **kwargs):
+	def get_jobs_list(self, *args, **kwargs):
 		data_dict = kwargs
-		#data_dict['draw'] = 1
+		# data_dict['draw'] = 1
 		data_dict['data'] = self.db.get_all_jobs()
 		data_dict['recordsTotal'] = len(data_dict['data'])
 		data_dict['recordsFiltered'] = len(data_dict['data'])
-		#result = self.db.get_all_jobs()
+		# result = self.db.get_all_jobs()
 		jenc = json.JSONEncoder()
 		return jenc.encode(data_dict)
 
 	# submit job to queue
-	def POST(self):
+	@cherrypy.expose
+	def submit_job_to_queue(self):
 		cl = cherrypy.request.headers['Content-Length']
 		rawbody = cherrypy.request.body.read(int(cl))
 		job = json.loads(rawbody)
@@ -389,54 +407,44 @@ class SchedulerJobsWebService(object):
 		return 'inserted job Id:' + str(job['Id'])
 
 	# change job properties (priority, ect...)
-	def PUT(self, *args, **kwargs):
-		cl = cherrypy.request.headers['Content-Length']
-		rawbody = cherrypy.request.body.read(int(cl))
-		job = json.loads(rawbody)
-		self.db.update_job(job)
-		cherrypy.engine.publish("update_job", job)
-		return 'updated job Id:' + str(job['Id'])
+	def update_job(self, *args, **kwargs):
+			cl = cherrypy.request.headers['Content-Length']
+			rawbody = cherrypy.request.body.read(int(cl))
+			job = json.loads(rawbody)
+			self.db.update_job(job)
+			cherrypy.engine.publish("update_job", job)
+			return 'updated job Id:' + str(job['Id'])
 
 	# delete job from queue
-	def DELETE(self):
+	def delete_job(self):
 		cl = cherrypy.request.headers['Content-Length']
-		rawbody = cherrypy.request.body.read(int(cl))
+		bodylines = cherrypy.request.body.readlines()
+		rawbody = ''.join(bodylines)
 		job = json.loads(rawbody)
 		cherrypy.engine.publish("delete_job", job)
 		return 'Canceling job Id:' + str(job['Id'])
 
-	def OPTIONS(self):
-		if self.devMode:
-			SchedulerHandler.addOptionsHeaders(cherrypy)
-
-
-class SchedulerProcessNodeWebService(object):
-	'''
-	Scheduler exposed /process_node
-	class for adding, updating, or removing process nodes
-	'''
-	exposed = True
-
-	def __init__(self, db):
-		self.db = db
+	def job_options_request(self):
+		self.addOptionsHeaders()
 
 	@cherrypy.tools.accept(media='text/plain')
-	#@cherrypy.tools.json_out()
+	@cherrypy.expose
 	# get list of computer nodes
-	def GET(self, *args, **kwargs):
+	def get_process_nodes(self, *args, **kwargs):
 		data_dict = kwargs
-		#data_dict['draw'] = 1
-		#if computer_name == None:
+		# data_dict['draw'] = 1
+		# if computer_name == None:
 		data_dict['data'] = self.db.get_all_process_nodes()
-		#else:
-		#data_dict['data'] = self.db.get_process_node(computer_name)
+		# else:
+		# data_dict['data'] = self.db.get_process_node(computer_name)
 		data_dict['recordsTotal'] = len(data_dict['data'])
 		data_dict['recordsFiltered'] = len(data_dict['data'])
 		jenc = json.JSONEncoder()
 		return jenc.encode(data_dict)
 
+	@cherrypy.expose
 	# add process node
-	def POST(self):
+	def add_process_node(self):
 		cl = cherrypy.request.headers['Content-Length']
 		rawbody = cherrypy.request.body.read(int(cl))
 		proc_node = json.loads(rawbody)
@@ -444,21 +452,31 @@ class SchedulerProcessNodeWebService(object):
 		cherrypy.engine.publish('process_node_update', proc_node)
 		return 'inserted process node'
 
+	@cherrypy.expose
 	# change process node status
-	def PUT(self):
+	def update_process_node(self):
 		try:
 			cl = cherrypy.request.headers['Content-Length']
 			rawbody = cherrypy.request.body.read(int(cl))
 			proc_node = json.loads(rawbody)
-			#print proc_node
-			#self.db.insert_process_node(proc_node)
+			# print proc_node
+			# self.db.insert_process_node(proc_node)
 			cherrypy.engine.publish('process_node_update', proc_node)
 			return 'updated process node'
 		except:
 			exc_str = traceback.format_exc()
 			return exc_str
 
+	@cherrypy.expose
 	# computer node went offline, remove from list
-	def DELETE(self):
-		#cherrypy.session.pop('mystring', None)
+	def delete_process_node(self):
+		# cherrypy.session.pop('mystring', None)
 		pass
+
+	def addOptionsHeaders(self):
+		if self.devMode:
+			options_headers = cherrypy.request.headers
+			cherrypy.response.headers['Access-Control-Allow-Origin'] = options_headers['Origin']
+			cherrypy.response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE';
+			cherrypy.response.headers['Access-Control-Allow-Headers'] = options_headers['Access-Control-Request-Headers']
+			cherrypy.response.headers['Content-Type'] = 'text/html; charset=utf-8'
