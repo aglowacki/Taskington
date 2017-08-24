@@ -16,9 +16,17 @@ export class GrowlService {
     this.resetVariables();
   }
 
+  addErrorMessage(summaryText: string, detailText: string) {
+    this.addMessage('error', summaryText, detailText);
+  }
+
   addSuccessMessage(summaryText: string, detailText: string) {
+    this.addMessage('success', summaryText, detailText);
+  }
+
+  private addMessage(severity: string, summaryText: string, detailText: string) {
     let newMessage: Message = {
-      severity: 'success',
+      severity: severity,
       detail: detailText,
       summary: summaryText
     };

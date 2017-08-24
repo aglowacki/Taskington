@@ -1,5 +1,5 @@
 '''
-Created on Nov 2015
+Created on May 2015
 
 @author: Arthur Glowacki, Argonne National Laboratory
 
@@ -30,36 +30,13 @@ IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY O
 SUCH DAMAGE.
 '''
 
-import logging
-import logging.handlers
+class Route:
+	def __init__(self, function_name, http_method, controller, path=None):
+		if path is None:
+			path = '/%s' % function_name
 
-class RestBase:
-	def __init__(self):
-		pass
-
-	def run(self):
-		raise RuntimeError("Need to Implement run method")
-
-	def stop(self):
-		raise RuntimeError("Need to Implement stop method")
-
-	def _setup_logging_(self, log, logtype, logname, stream_to_console=True):
-		maxBytes = getattr(log, "rot_maxBytes", 20971520) # 20Mb
-		backupCount = getattr(log, "rot_backupCount", 10)
-		fname = getattr(log, logtype, logname)
-		h = logging.handlers.RotatingFileHandler(fname, 'a', maxBytes, backupCount)
-		h.setLevel(logging.DEBUG)
-		formatter = logging.Formatter('%(asctime)s | %(levelname)s | PID[%(process)d] | %(funcName)s(): %(message)s')
-		log.setLevel(logging.DEBUG)
-		h.setFormatter(formatter)
-		log.addHandler(h)
-		if stream_to_console:
-			ch = logging.StreamHandler()
-			ch.setFormatter(formatter)
-			ch.setLevel(logging.WARNING)
-			log.addHandler(ch)
-
-	def connect_all_routes(self, dispatcher, routes):
-		for route in routes:
-			dispatcher.connect(route.name, route.path, controller=route.controller,
-			                   action=route.action, conditions=dict(method=route.method))
+		self.name = function_name
+		self.action = function_name
+		self.controller = controller
+		self.method = http_method
+		self.path = path

@@ -1,3 +1,139 @@
 .ui-datatable td {
   word-wrap: break-word;
 }
+
+.content-left {
+  float: left;
+  margin-left: 25px;
+
+}
+
+.content-center {
+  margin-left: 170px;
+  margin-right: 170px;
+}
+
+.content-right {
+  float:right;
+  margin-right: 25px;
+}
+
+.content-left img {
+  max-width: 100%;
+  align-self: center;
+}
+
+.content-side {
+  width: 170px;
+  height: 100%;
+  vertical-align: middle;
+  display: flex;
+  text-align: center;
+}
+
+.goodColumnDataSpan {
+  color: #33cc00;
+}
+
+.warningColumnDataSpan {
+  color: #ff9900;
+}
+
+.alertColumnDataSpan {
+  color: red;
+}
+
+.warningDataRow.ui-datatable-odd {
+  background: #ffcc80 !important;
+}
+
+.warningDataRow.ui-datatable-even {
+  background: #ffebcc !important;
+}
+
+.alertDataRow.ui-datatable-odd {
+  background: #ff9999 !important;
+}
+
+.alertDataRow.ui-datatable-even {
+  background: #ffcccc !important;
+}
+
+header {
+  margin-top: 0px;
+  position: relative;
+  color: #001a33;
+  padding: 15px;
+  margin: 0px 0px 0px 0px;
+  height: 75px;
+  text-align: center;
+}
+
+.title-gradient, .ui-tabview .ui-tabview-nav {
+  background: #79a6d2;
+  border-bottom: 1px solid #004d99;
+}
+
+.ui-tabview .ui-tabview-nav > li.ui-state-default {
+  color: #11496f;
+  background: #a6d4f2;
+  border: none;
+}
+
+.ui-tabview .ui-tabview-nav > li.ui-state-default:not(.ui-state-active):not(.ui-state-disabled):hover  {
+  color: #11496f;
+  background: #e9f4fc;
+}
+
+.ui-tabview .ui-tabview-nav > li.ui-state-active {
+  color: #11496f;
+  background: #4da8e6;
+}
+
+.ui-tabview-nav.ui-corner-all {
+  border-radius: 0px;
+}
+
+.ui-tabview {
+  padding: 0px;
+}
+
+footer {
+  height: 70px;
+  text-align: center;
+  border-top: 1px solid #004d99;
+  padding-top: 5px;
+}
+
+.footer-contents {
+  height: 50px;
+}
+
+.footer-contents img {
+  max-height: 100%;
+}
+
+body {
+  margin:0px;
+  background: #f7ffff;
+}
+
+.ui-tabview .ui-tabview-panels.ui-widget-content, .ui-tabview {
+  background: transparent;
+}
+
+.ui-datatable tbody > tr.ui-widget-content.ui-datatable-odd {
+  background: #f2f2f2;
+}
+
+.ui-datatable tbody > tr.ui-widget-content.ui-datatable-even {
+  background: #edf2f7;
+}
+
+.ui-datatable table {
+  table-layout: auto
+}
+
+.ui-g-1, .ui-g-2, .ui-g-3, .ui-g-4, .ui-g-5, .ui-g-6, .ui-g-7, .ui-g-8, .ui-g-9, .ui-g-10, .ui-g-11, .ui-g-12 {
+  padding: 2px;
+}

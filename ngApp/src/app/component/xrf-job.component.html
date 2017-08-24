@@ -1,12 +1,5 @@
-Job Path: <input type="text" pInputText [(ngModel)]="mapsJob.DataPath">
-<button type="button" (click)="showXfm0DirectoryDialog()" pButton icon="fa-search" label="xfm0"></button>
-<button type="button" (click)="showXfm0Data2DirectoryDialog()" pButton icon="fa-search" label="xfm0-data2"></button>
-<button type="button" (click)="showCNMDirectoryDialog()" pButton icon="fa-search" label="CNM"></button>
-
-<br/>
-<p-checkbox [(ngModel)]="allDatasets"></p-checkbox>All Datasets
-
-<br/><br/>
+<job-path-input #jobPathInput [jobPathOptionsItemList]="jobPathOptionsItemList"
+                [defaultDataPath]="mapsJob.DataPath"></job-path-input>
 
 <p-panel header="Analysis Options">
 
@@ -66,39 +59,7 @@ Job Path: <input type="text" pInputText [(ngModel)]="mapsJob.DataPath">
                                   autoWidth="false" [style]="{'width': '100%'}"></p-dropdown></div>
 </div>
 
-<div class="ui-g">
-  <div class="ui-g-2">Email Address for completion notification:</div>
-  <div class="ui-g-2">
-    <div class="ui-g-2">
-    <button type="button" (click)="addNewEmail()" pButton icon="fa-plus"></button>
-    </div>
-    <div class="ui-g-10">
-      <div *ngFor="let email of emailAddresses; let i = index;">
-        <div class="ui-g-11">
-          <input type="text" name="emailInput-{{i}}" pInputText [(ngModel)]="emailAddresses[i].value">
-        </div>
-        <div class="ui-g-1">
-          <button type="button" (click)="removeEmail(i)" pButton icon="fa-minus" class="ui-button-danger"></button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+<email-input></email-input>
 
 <br/>
 <button type="button" (click)="submitJob()" pButton icon="fa-check" label="Submit Job"></button>
-
-<p-dialog header="Browse directories" [(visible)]="displayDirectorySelectionDialog"
-          modal="modal">
-  <div class="jobPathSelectionTreeContainer">
-    <p-tree [value]="directorySelectionTree"
-            selectionMode="single"
-            [(selection)]="selectedDirectory" >
-
-    </p-tree>
-  </div>
-  <p-footer>
-    <button type="button" pButton icon="fa-check" (click)="makeDirectorySelection()" label="Select"></button>
-    <button type="button" pButton icon="fa-close" (click)="displayDirectorySelectionDialog=false" label="Close"></button>
-  </p-footer>
-</p-dialog>

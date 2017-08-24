@@ -1,0 +1,90 @@
+<job-path-input [jobPathOptionsItemList]="jobPathOptionsItemList"
+                [defaultDataPath]="ptyJob.DataPath"></job-path-input>
+
+<div class="ui-g">
+  <div class="ui-g-2">Calculated STXM & DPC only:</div>
+  <div class="ui-g-2"><p-checkbox binary="true" [(ngModel)]="calculatedSTXMAndDPC"></p-checkbox></div>
+</div>
+
+<div class="ui-g">
+  <div class="ui-g-2">Algorithm:</div>
+  <div class="ui-g-1"><p-checkbox binary="true" [(ngModel)]="algEpie"></p-checkbox>ePIE</div>
+  <div class="ui-g-1"><p-checkbox binary="true" [(ngModel)]="algDm"></p-checkbox>DM</div>
+</div>
+
+<div class="ui-g">
+  <div class="ui-g-2">Detector:</div>
+  <div class="ui-g-2">
+    <div class="ui-g-6">Distance(m)</div>
+    <div class="ui-g-6"><input type="text" pInputText size="4" [(ngModel)]="ptyJobArgs.DetectorDistance"></div>
+  </div>
+  <div class="ui-g-2">
+    <div class="ui-g-6">Pixel size (nm)</div>
+    <div class="ui-g-6"><input type="text" pInputText size="4" [(ngModel)]="ptyJobArgs.PixelSize"></div>
+  </div>
+</div>
+
+<div class="ui-g">
+  <div class="ui-g-2">Diffraction Pattern:</div>
+  <div class="ui-g-2">
+    <div class="ui-g-6">Center (Y,X)</div>
+    <div class="ui-g-6">
+      <input type="text" pInputText size="3" [(ngModel)]="ptyJobArgs.CenterY">,
+      <input type="text" pInputText size="3" [(ngModel)]="ptyJobArgs.CenterX"></div>
+  </div>
+  <div class="ui-g-2">
+    <div class="ui-g-6">Size</div>
+    <div class="ui-g-6"><input type="text" pInputText size="4" [(ngModel)]="ptyJobArgs.DiffractionSize"></div>
+  </div>
+  <div class="ui-g-2">
+    <div class="ui-g-6">Rotate 90˚</div>
+    <p-spinner size="5" [min]="0" [max]="3" [(ngModel)]="ptyJobArgs.Rotation"></p-spinner>
+  </div>
+</div>
+
+<div class="ui-g">
+  <div class="ui-g-2">Probe:</div>
+  <div class="ui-g-2">
+    <div class="ui-g-6">Size (nm)</div>
+    <div class="ui-g-6"><input type="text" size="4" pInputText [(ngModel)]="ptyJobArgs.ProbeSize"></div>
+  </div>
+  <div class="ui-g-2">
+    <div class="ui-g-6">Modes</div>
+    <div class="ui-g-6"><input type="text" size="4" pInputText [(ngModel)]="ptyJobArgs.ProbeModes"></div>
+  </div>
+</div>
+
+<div class="ui-g">
+  <div class="ui-g-2">Threshold:</div>
+  <div class="ui-g-1"><input type="text" pInputText size="4" [(ngModel)]="ptyJobArgs.Threshold"></div>
+</div>
+
+<div class="ui-g">
+  <div class="ui-g-2">Iterations:</div>
+  <div class="ui-g-1"><input type="text" pInputText size="4" [(ngModel)]="ptyJobArgs.Iterations"></div>
+</div>
+
+<div class="ui-g">
+  <div class="ui-g-2">Priority (1 highest - 10 lowest):</div>
+  <div class="ui-g-2"><p-spinner size="5" [min]="1" [max]="10" [(ngModel)]="ptyJob.Priority"></p-spinner></div>
+</div>
+
+<div class="ui-g">
+  <div class="ui-g-2">Process Node:</div>
+  <div class="ui-g-2"><p-dropdown [options]="processNodesSelectOptions"
+                                  [(ngModel)]="ptyJob.Process_Node_Id"
+                                  autoWidth="false" [style]="{'width': '100%'}"></p-dropdown></div>
+</div>
+
+<div class="ui-g">
+  <div class="ui-g-2">GPU Node:</div>
+  <div class="ui-g-2"><p-dropdown [options]="gpuOptions"
+                                  [(ngModel)]="ptyJobArgs.GPU_ID"
+                                  autoWidth="false" [style]="{'width': '100%'}"></p-dropdown>
+  </div>
+</div>
+
+<email-input></email-input>
+
+<br/>
+<button type="button" (click)="submitJob()" pButton icon="fa-check" label="Submit Job"></button>

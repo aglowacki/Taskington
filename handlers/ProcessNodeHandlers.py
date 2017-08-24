@@ -38,14 +38,37 @@ import re
 import modules
 import Constants
 
-#todo: this is redefined in ProcessNode.py 
+#todo: this is redefined in ProcessNode.py
+from model.route import Route
+
 STR_JOB_LOG_DIR_NAME = 'job_logs'
 
 
 class ProcessNodeHandler(object):
 
-	def __init__(self):
+	def __init__(self, db, logger):
 		self.software_dict = {}
+		self.db = db
+		self.logger = logger
+
+
+	def get_routes(self):
+		routes = [];
+		routes.append(Route('index', 'GET', self, path='/'))
+		routes.append(Route('get_job_log', 'GET', self))
+		routes.append(Route('get_supported_software', 'GET', self))
+		routes.append(Route('version', 'GET', self))
+		routes.append(Route('version_file', 'GET', self))
+		routes.append(Route('update_id', 'GET', self))
+		routes.append(Route('gen_job_args', 'GET', self))
+
+		JOB_QUEUE_PATH = '/job_queue'
+		routes.append(Route('get_process_node_job_list', 'GET', self, path=JOB_QUEUE_PATH))
+		routes.append(Route('submit_process_node_job', 'POST', self, path=JOB_QUEUE_PATH))
+		routes.append(Route('update_process_node_job', 'PUT', self, path=JOB_QUEUE_PATH))
+		routes.append(Route('delete_process_node_job', 'DELETE', self, path=JOB_QUEUE_PATH))
+
+		return routes
 
 	def set_software_dir(self, software_dict):
 		self.software_dict = software_dict
@@ -115,20 +138,11 @@ class ProcessNodeHandler(object):
 		jenc = json.JSONEncoder()
 		return jenc.encode(args_dict)
 
-
-class ProcessNodeJobsWebService(object):
-	'''
-	ProcessNode exposed /job_queue
-	'''
-	exposed = True
-	def __init__(self, db, logger):
-		self.db = db
-		self.logger = logger
-
 	@cherrypy.tools.accept(media='text/plain')
 	@cherrypy.tools.json_out()
+	@cherrypy.expose
 	# get list of jobs on this nodes queue
-	def GET(self, job_id=None):
+	def get_process_node_job_list(self, job_id=None):
 		result = None
 		if job_id == None:
 			result = self.db.get_all_jobs()
@@ -137,8 +151,8 @@ class ProcessNodeJobsWebService(object):
 		jenc = json.JSONEncoder()
 		return jenc.encode(result)
 
-	# submit a job
-	def POST(self):
+		# submit a job
+	def submit_process_node_job(self):
 		cl = cherrypy.request.headers['Content-Length']
 		rawbody = cherrypy.request.body.read(int(cl))
 		job = json.loads(rawbody)
@@ -164,11 +178,11 @@ class ProcessNodeJobsWebService(object):
 			return 'Error: could not parse json job'
 
 	# update job
-	def PUT(self):
+	def update_process_node_job(self):
 		return 'updated process node'
 
 	# remove a job from the queue
-	def DELETE(self):
+	def delete_process_node_job(self):
 		cl = cherrypy.request.headers['Content-Length']
 		rawbody = cherrypy.request.body.read(int(cl))
 		job = json.loads(rawbody)
