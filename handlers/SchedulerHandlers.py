@@ -36,12 +36,17 @@ import cherrypy
 import glob
 import os
 import base64
+
+from cherrypy import HTTPError
+
 import Settings
 import unicodedata
 import requests
 import Constants
 import traceback
 
+from handlers.HandlerBase import HandlerBase
+from handlers.LoginHandler import LoginHandler
 from model.route import Route
 
 
@@ -63,11 +68,17 @@ def get_dirs(path, level):
 		dir_list += new_list
 	return dir_list
 
-class SchedulerHandler(object):
+class SchedulerHandler(HandlerBase):
+	cherrypy.tools.auth = cherrypy.Tool('before_handler', LoginHandler.checkAuthorization)
+
+	_cp_config = {
+		'tools.sessions.on': True,
+		'tools.auth.on': True
+	}
 
 	def __init__(self, db, devMode, settings=None):
+		HandlerBase.__init__(self, devMode)
 		self.db = db
-		self.devMode = devMode
 		self.settings = settings
 		self.api_dict = {'functions': [{'Function': 'api',
 										'Parameters': 'N/A',
@@ -127,34 +138,33 @@ class SchedulerHandler(object):
 
 	def get_routes(self):
 		routes = [];
-		routes.append(Route('index', 'GET', self, path='/'))
-		routes.append(Route('new', 'GET', self))
-		routes.append(Route('api', 'GET', self))
-		routes.append(Route('help', 'GET', self))
-		routes.append(Route('get_software_versions', 'GET', self))
-		routes.append(Route('get_output_list', 'GET', self))
-		routes.append(Route('get_dataset_dirs_list', 'GET', self))
-		routes.append(Route('get_spectrum_image_list', 'GET', self))
-		routes.append(Route('get_mda_list', 'GET', self))
-		routes.append(Route('get_spectrum_image', 'GET', self))
-		routes.append(Route('get_spectrum_txt', 'GET', self))
-		routes.append(Route('get_all_unprocessed_jobs', 'GET', self))
-		routes.append(Route('get_all_processing_jobs', 'GET', self))
-		routes.append(Route('get_all_finished_jobs', 'GET', self))
-		routes.append(Route('get_job_dict', 'GET', self))
+		routes.extend(Route.createRoutes('index', 'GET', self, path='/'))
+		routes.extend(Route.createRoutes('new', 'GET', self))
+		routes.extend(Route.createRoutes('api', 'GET', self, includeOptionsHTTPMethodForPath=self.devMode))
+		routes.extend(Route.createRoutes('help', 'GET', self, includeOptionsHTTPMethodForPath=self.devMode))
+		routes.extend(Route.createRoutes('get_software_versions', 'GET', self, includeOptionsHTTPMethodForPath=self.devMode))
+		routes.extend(Route.createRoutes('get_output_list', 'GET', self, includeOptionsHTTPMethodForPath=self.devMode))
+		routes.extend(Route.createRoutes('get_dataset_dirs_list', 'GET', self, includeOptionsHTTPMethodForPath=self.devMode))
+		routes.extend(Route.createRoutes('get_spectrum_image_list', 'GET', self, includeOptionsHTTPMethodForPath=self.devMode))
+		routes.extend(Route.createRoutes('get_mda_list', 'GET', self, includeOptionsHTTPMethodForPath=self.devMode))
+		routes.extend(Route.createRoutes('get_spectrum_image', 'GET', self, includeOptionsHTTPMethodForPath=self.devMode))
+		routes.extend(Route.createRoutes('get_spectrum_txt', 'GET', self, includeOptionsHTTPMethodForPath=self.devMode))
+		routes.extend(Route.createRoutes('get_all_unprocessed_jobs', 'GET', self, includeOptionsHTTPMethodForPath=self.devMode))
+		routes.extend(Route.createRoutes('get_all_processing_jobs', 'GET', self, includeOptionsHTTPMethodForPath=self.devMode))
+		routes.extend(Route.createRoutes('get_all_finished_jobs', 'GET', self, includeOptionsHTTPMethodForPath=self.devMode))
+		routes.extend(Route.createRoutes('get_job_dict', 'GET', self, includeOptionsHTTPMethodForPath=self.devMode))
 
 		JOB_PATH = '/job'
-		routes.append(Route('get_jobs_list', 'GET', self, path=JOB_PATH))
-		routes.append(Route('submit_job_to_queue', 'POST', self, path=JOB_PATH))
-		routes.append(Route('update_job', 'PUT', self, path=JOB_PATH))
-		routes.append(Route('delete_job', 'DELETE', self, path=JOB_PATH))
-		routes.append(Route('job_options_request', 'OPTIONS', self, path=JOB_PATH))
+		routes.extend(Route.createRoutes('get_jobs_list', 'GET', self, path=JOB_PATH, includeOptionsHTTPMethodForPath=self.devMode))
+		routes.extend(Route.createRoutes('submit_job_to_queue', 'POST', self, path=JOB_PATH))
+		routes.extend(Route.createRoutes('update_job', 'PUT', self, path=JOB_PATH))
+		routes.extend(Route.createRoutes('delete_job', 'DELETE', self, path=JOB_PATH))
 
 		NODE_PATH = '/process_node'
-		routes.append(Route('get_process_nodes', 'GET', self, path=NODE_PATH))
-		routes.append(Route('add_process_node', 'POST', self, path=NODE_PATH))
-		routes.append(Route('update_process_node', 'PUT', self, path=NODE_PATH))
-		routes.append(Route('delete_process_node', 'DELETE', self, path=NODE_PATH))
+		routes.extend(Route.createRoutes('get_process_nodes', 'GET', self, path=NODE_PATH, includeOptionsHTTPMethodForPath=self.devMode))
+		routes.extend(Route.createRoutes('add_process_node', 'POST', self, path=NODE_PATH))
+		routes.extend(Route.createRoutes('update_process_node', 'PUT', self, path=NODE_PATH))
+		routes.extend(Route.createRoutes('delete_process_node', 'DELETE', self, path=NODE_PATH))
 
 		return routes;
 
@@ -177,14 +187,20 @@ class SchedulerHandler(object):
 		return file('new-public/index.html')
 
 	@cherrypy.expose
+	@LoginHandler.auth_required_logged_in()
+	@HandlerBase.execute
 	def api(self):
 		return self.show_api()
 
 	@cherrypy.expose
+	@LoginHandler.auth_required_logged_in()
+	@HandlerBase.execute
 	def help(self):
 		return self.show_api()
 
 	@cherrypy.expose
+	@LoginHandler.auth_required_logged_in()
+	@HandlerBase.execute
 	def get_software_versions(self):
 		ret_str = '<!DOCTYPE html><html><head><link rel="stylesheet" href="/static/data_tables/css/jquery.dataTables.css"/><script src="/static/jquery/jquery-2.0.3.min.js"></script><script src="/static/data_tables/js/jquery.dataTables.js"></script> <script type="text/javascript">$(document).ready(function() { $("#xrf_versions").DataTable(); }); </script> </head><body><h2>XRF-Maps Versions</h2><br><table id="xrf_versions" class="display_table display" width="100%" cellspacing="0"><thead><tr><td width="20%"><b>Hostname</b></td><td width="80%"><b>Version</b></td></tr></thead><tbody>'
 		proc_nodes = self.db.get_all_process_nodes()
@@ -195,6 +211,8 @@ class SchedulerHandler(object):
 		return ret_str
 
 	@cherrypy.expose
+	@LoginHandler.auth_required_logged_in()
+	@HandlerBase.execute
 	def get_output_list(self, job_path=None, process_type=None):
 		rfile = file('public/get_output_list.html')
 		retstr = rfile.read()
@@ -223,6 +241,8 @@ class SchedulerHandler(object):
 		return retstr
 
 	@cherrypy.expose
+	@LoginHandler.auth_required_logged_in()
+	@HandlerBase.execute
 	def get_dataset_dirs_list(self, job_path, depth=0):
 		depth = int(depth)
 		job_roots_dict = self.settings.getSetting(Settings.SECTION_JOB_DIR_ROOTS)
@@ -244,6 +264,8 @@ class SchedulerHandler(object):
 			return jenc.encode(dir_list)
 
 	@cherrypy.expose
+	@LoginHandler.auth_required_logged_in()
+	@HandlerBase.execute
 	def get_spectrum_image_list(self, job_path):
 		data_dict = dict()
 		img_path = os.path.join(job_path, 'output_old/*.png')
@@ -254,6 +276,8 @@ class SchedulerHandler(object):
 		return jenc.encode(data_dict)
 
 	@cherrypy.expose
+	@LoginHandler.auth_required_logged_in()
+	@HandlerBase.execute
 	def get_mda_list(self, job_path=None):
 		if cherrypy.request.method == "OPTIONS":
 			if self.devMode:
@@ -280,6 +304,8 @@ class SchedulerHandler(object):
 			return False
 
 	@cherrypy.expose
+	@LoginHandler.auth_required_logged_in()
+	@HandlerBase.execute
 	def get_spectrum_image(self, path):
 		encoded_string = ''
 		path = path.replace('..', '')
@@ -292,6 +318,8 @@ class SchedulerHandler(object):
 			return "Error: file not file "+path
 
 	@cherrypy.expose
+	@LoginHandler.auth_required_logged_in()
+	@HandlerBase.execute
 	def get_spectrum_txt(self, path):
 		path = path.replace('..', '')
 		if self.check_path(path) == True:
@@ -305,6 +333,8 @@ class SchedulerHandler(object):
 			return "Error: file not file " + path
 
 	@cherrypy.expose
+	@LoginHandler.auth_required_logged_in()
+	@HandlerBase.execute
 	def get_all_unprocessed_jobs(self, *args, **kwargs):
 		data_dict = kwargs
 		#data_dict['draw'] = 1
@@ -316,6 +346,8 @@ class SchedulerHandler(object):
 		return jenc.encode(data_dict)
 
 	@cherrypy.expose
+	@LoginHandler.auth_required_logged_in()
+	@HandlerBase.execute
 	def get_all_processing_jobs(self, *args, **kwargs):
 		data_dict = kwargs
 		#data_dict['draw'] = 1
@@ -327,6 +359,8 @@ class SchedulerHandler(object):
 		return jenc.encode(data_dict)
 
 	@cherrypy.expose
+	@LoginHandler.auth_required_logged_in()
+	@HandlerBase.execute
 	def get_all_finished_jobs(self, *args, **kwargs):
 		data_dict = kwargs
 		#data_dict['draw'] = 1
@@ -342,6 +376,8 @@ class SchedulerHandler(object):
 		return jenc.encode(data_dict)
 
 	@cherrypy.expose
+	@LoginHandler.auth_required_logged_in()
+	@HandlerBase.execute
 	def get_job_dict(self, experiment_name):
 		proc_nodes = self.db.get_all_process_nodes()
 		for proc_node in proc_nodes:
@@ -368,6 +404,8 @@ class SchedulerHandler(object):
 		return 'Error'
 
 	@cherrypy.expose
+	@LoginHandler.auth_required_logged_in()
+	@HandlerBase.execute
 	def get_supported_software(self):
 		proc_nodes = self.db.get_all_process_nodes()
 		jenc = json.JSONEncoder()
@@ -382,6 +420,8 @@ class SchedulerHandler(object):
 
 	@cherrypy.tools.accept(media='text/plain')
 	@cherrypy.expose
+	@LoginHandler.auth_required_logged_in()
+	@HandlerBase.execute
 	# @cherrypy.tools.json_out()
 	# return list of jobs in queue
 	def get_jobs_list(self, *args, **kwargs):
@@ -396,6 +436,8 @@ class SchedulerHandler(object):
 
 	# submit job to queue
 	@cherrypy.expose
+	@LoginHandler.auth_required_logged_in()
+	@HandlerBase.execute
 	def submit_job_to_queue(self):
 		cl = cherrypy.request.headers['Content-Length']
 		rawbody = cherrypy.request.body.read(int(cl))
@@ -406,6 +448,8 @@ class SchedulerHandler(object):
 		cherrypy.engine.publish("new_job", job)
 		return 'inserted job Id:' + str(job['Id'])
 
+	@cherrypy.expose
+	# TODO update security for this
 	# change job properties (priority, ect...)
 	def update_job(self, *args, **kwargs):
 			cl = cherrypy.request.headers['Content-Length']
@@ -415,6 +459,9 @@ class SchedulerHandler(object):
 			cherrypy.engine.publish("update_job", job)
 			return 'updated job Id:' + str(job['Id'])
 
+	@cherrypy.expose
+	@LoginHandler.auth_required_logged_in()
+	@HandlerBase.execute
 	# delete job from queue
 	def delete_job(self):
 		cl = cherrypy.request.headers['Content-Length']
@@ -424,11 +471,10 @@ class SchedulerHandler(object):
 		cherrypy.engine.publish("delete_job", job)
 		return 'Canceling job Id:' + str(job['Id'])
 
-	def job_options_request(self):
-		self.addOptionsHeaders()
-
 	@cherrypy.tools.accept(media='text/plain')
 	@cherrypy.expose
+	@LoginHandler.auth_required_logged_in()
+	@HandlerBase.execute
 	# get list of computer nodes
 	def get_process_nodes(self, *args, **kwargs):
 		data_dict = kwargs
@@ -440,9 +486,11 @@ class SchedulerHandler(object):
 		data_dict['recordsTotal'] = len(data_dict['data'])
 		data_dict['recordsFiltered'] = len(data_dict['data'])
 		jenc = json.JSONEncoder()
+		cherrypy.response.headers['Access-Control-Allow-Credentials'] = 'true'
 		return jenc.encode(data_dict)
 
 	@cherrypy.expose
+	# TODO update security for this
 	# add process node
 	def add_process_node(self):
 		cl = cherrypy.request.headers['Content-Length']
@@ -453,6 +501,7 @@ class SchedulerHandler(object):
 		return 'inserted process node'
 
 	@cherrypy.expose
+	# TODO update security for this
 	# change process node status
 	def update_process_node(self):
 		try:
@@ -468,15 +517,9 @@ class SchedulerHandler(object):
 			return exc_str
 
 	@cherrypy.expose
+	@LoginHandler.auth_required_logged_in()
+	@HandlerBase.execute
 	# computer node went offline, remove from list
 	def delete_process_node(self):
 		# cherrypy.session.pop('mystring', None)
 		pass
-
-	def addOptionsHeaders(self):
-		if self.devMode:
-			options_headers = cherrypy.request.headers
-			cherrypy.response.headers['Access-Control-Allow-Origin'] = options_headers['Origin']
-			cherrypy.response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE';
-			cherrypy.response.headers['Access-Control-Allow-Headers'] = options_headers['Access-Control-Request-Headers']
-			cherrypy.response.headers['Content-Type'] = 'text/html; charset=utf-8'
