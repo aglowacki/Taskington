@@ -24,6 +24,10 @@ export class GrowlService {
     this.addMessage('success', summaryText, detailText);
   }
 
+  addWarnMessage(summaryText: string, detailText: string) {
+    this.addMessage('warn', summaryText, detailText);
+  }
+
   private addMessage(severity: string, summaryText: string, detailText: string) {
     let newMessage: Message = {
       severity: severity,
