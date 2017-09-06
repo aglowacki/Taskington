@@ -29,14 +29,33 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 '''
+from handlers import HandlerBase
+
 
 class Route:
 	def __init__(self, function_name, http_method, controller, path=None):
-		if path is None:
-			path = '/%s' % function_name
+		path = Route.__getPath(path, function_name)
 
 		self.name = function_name
 		self.action = function_name
 		self.controller = controller
 		self.method = http_method
 		self.path = path
+
+	@staticmethod
+	def __getPath(path, function_name):
+		if path is None:
+			return '/%s' % function_name
+		return path
+
+
+	@staticmethod
+	def createRoutes(function_name, http_method, controller, includeOptionsHTTPMethodForPath=False, path=None):
+		routes = [];
+
+		routes.append(Route(function_name, http_method, controller, path));
+		if includeOptionsHTTPMethodForPath:
+			path = Route.__getPath(path, function_name)
+			routes.append(Route(HandlerBase.ADD_OPTIONS_FUNCTION_NAME, 'OPTIONS', controller, path))
+
+		return routes;
