@@ -1,3 +1,14 @@
+.login-div {
+  width: 20%;
+  padding-left: 40%;
+  padding-top: 100px;
+  padding-bottom: 100px;
+}
+
+.full-parent-width {
+  width: 100%;
+}
+
 .ui-datatable td {
   word-wrap: break-word;
 }
@@ -99,7 +110,6 @@ header {
 }
 
 footer {
-  height: 70px;
   text-align: center;
   border-top: 1px solid #004d99;
   padding-top: 5px;
