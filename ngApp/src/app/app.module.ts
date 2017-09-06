@@ -14,6 +14,7 @@ import {ConfirmDialogModule,ConfirmationService} from 'primeng/primeng';
 import { Angular2FontawesomeModule } from 'angular2-fontawesome/angular2-fontawesome'
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { FormsModule } from "@angular/forms";
+import {AuthenticationService} from "./service/Authentication.service";
 
 @NgModule({
   declarations: [
@@ -49,7 +50,7 @@ import { FormsModule } from "@angular/forms";
     ConfirmDialogModule,
     ListboxModule
   ],
-  providers: [GrowlService, SchedulerService, ConfirmationService],
+  providers: [AuthenticationService, GrowlService, SchedulerService, ConfirmationService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
