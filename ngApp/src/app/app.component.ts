@@ -22,8 +22,8 @@ export class AppComponent {
   finishedJobs: Jobs;
 
   constructor(private schedulerService: SchedulerService,
-              private growlService: GrowlService,
-              private authenticationService: AuthenticationService) {
+              public growlService: GrowlService,
+              public authenticationService: AuthenticationService) {
     this.loadData();
 
     this.authenticationService.loginChange.subscribe(loggedIn => {
