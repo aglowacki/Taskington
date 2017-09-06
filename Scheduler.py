@@ -34,6 +34,8 @@ SUCH DAMAGE.
 import os, os.path
 import Settings
 import requests
+
+from handlers.LoginHandler import LoginHandler
 from handlers.SchedulerHandlers import SchedulerHandler
 from plugins.DatabasePlugin import DatabasePlugin
 from plugins.SQLiteDB import SQLiteDB
@@ -90,7 +92,6 @@ class Scheduler(RestBase):
 		self.conf = {
 			'/': {
 				'tools.staticdir.root': os.path.abspath(os.getcwd()),
-				'tools.sessions.on': True
 			},
 			'/static': {
 				'tools.staticdir.on': True,
@@ -326,9 +327,11 @@ class Scheduler(RestBase):
 		db.reset_process_nodes_status()
 
 		scheduleHandler = SchedulerHandler(db, self.devMode, self.all_settings)
+		loginHandler = LoginHandler(self.devMode, self.settings[Settings.SERVER_LDAP_URL], self.settings[Settings.SERVER_LDAP_DN_STRING])
 
 		dispatcher = cherrypy.dispatch.RoutesDispatcher()
 
+		self.connect_all_routes(dispatcher, loginHandler.get_routes())
 		self.connect_all_routes(dispatcher, scheduleHandler.get_routes())
 		self.conf['/']['request.dispatch'] = dispatcher
 		app = cherrypy.tree.mount(None, config=self.conf)
