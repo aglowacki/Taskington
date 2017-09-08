@@ -24,6 +24,6 @@ fi
 # Update any dependencies
 npm install
 
-ng build --target=production --base-href=/new-static/ --output-path=../new-public
+ng build --target=production --environment=prod --base-href=/new-static/ --output-path=../new-public
 
 cd $currentDir
