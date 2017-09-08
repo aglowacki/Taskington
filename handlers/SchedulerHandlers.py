@@ -139,7 +139,6 @@ class SchedulerHandler(HandlerBase):
 	def get_routes(self):
 		routes = [];
 		routes.extend(Route.createRoutes('index', 'GET', self, path='/'))
-		routes.extend(Route.createRoutes('new', 'GET', self))
 		routes.extend(Route.createRoutes('api', 'GET', self, includeOptionsHTTPMethodForPath=self.devMode))
 		routes.extend(Route.createRoutes('help', 'GET', self, includeOptionsHTTPMethodForPath=self.devMode))
 		routes.extend(Route.createRoutes('get_software_versions', 'GET', self, includeOptionsHTTPMethodForPath=self.devMode))
@@ -180,11 +179,7 @@ class SchedulerHandler(HandlerBase):
 
 	@cherrypy.expose
 	def index(self):
-		return file('public/scheduler_index.html')
-
-	@cherrypy.expose
-	def new(self):
-		return file('new-public/index.html')
+		return file('public/index.html')
 
 	@cherrypy.expose
 	@LoginHandler.auth_required_logged_in()
