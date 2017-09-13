@@ -3,10 +3,11 @@
  */
 
 import {SchedulerService} from "../service/services";
-import {Component} from "@angular/core";
+import {Component, OnDestroy} from "@angular/core";
 import {ProcessNodes, ProcessNode} from "../service/model/models";
 import {Observable} from "rxjs";
 import {StylesConstants} from "../constants/styles.constants";
+import {AuthenticationService} from "../service/Authentication.service";
 
 const PROCESSING_STATUS: string = "Processing";
 const IDLE_STATUS: string = "Idle";
@@ -17,37 +18,52 @@ const OFFLINE_STATUS: string = "OFFLINE";
   templateUrl: './process-nodes.component.html'
 })
 
-export class ProcessNodesComponent {
-
+export class ProcessNodesComponent implements OnDestroy {
   processNodes: ProcessNodes;
   expandedNodes: ProcessNode[];
+  loadProcessNodeSubscription;
+  authenticationSubscription;
   private _nodeKeys: string[];
 
-  constructor(private schedulerService: SchedulerService) {
+  constructor(private schedulerService: SchedulerService,
+              private authenticationService: AuthenticationService) {
     this.expandedNodes = [];
-    this.loadProcessNodes();
 
-    Observable.interval(4000).subscribe(() => {
+    this.subscribeToLoadingProcessNodes(this.authenticationService.loggedIn);
+    this.authenticationSubscription = this.authenticationService.loginChange.subscribe(loggedIn => this.subscribeToLoadingProcessNodes(loggedIn));
+  }
+
+  private subscribeToLoadingProcessNodes(loggedIn: boolean) {
+    if (loggedIn) {
       this.loadProcessNodes();
-    });
+      this.loadProcessNodeSubscription = Observable.interval(4000).subscribe(() => this.loadProcessNodes());
+    }
+    // on logout, it gets destroyed.
+  }
+
+  ngOnDestroy(): void {
+    this.loadProcessNodeSubscription.unsubscribe();
+    this.authenticationSubscription.unsubscribe();
   }
 
   private loadProcessNodes() {
-    this.schedulerService.getProcessNodes().subscribe(
-      processNodes => {
-        this.processNodes = processNodes;
-        let newExpandedNodes: ProcessNode[] = [];
-        for (let expandedNode of this.expandedNodes) {
-          for (let node of processNodes.data) {
-            if (expandedNode.Id == node.Id) {
-              newExpandedNodes.push(node);
+    if (this.authenticationService.loggedIn) {
+      this.schedulerService.getProcessNodes().subscribe(
+        processNodes => {
+          this.processNodes = processNodes;
+          let newExpandedNodes: ProcessNode[] = [];
+          for (let expandedNode of this.expandedNodes) {
+            for (let node of processNodes.data) {
+              if (expandedNode.Id == node.Id) {
+                newExpandedNodes.push(node);
+              }
             }
           }
-        }
-        this.expandedNodes = newExpandedNodes;
-      },
-      error => this.processNodes = null
-    );
+          this.expandedNodes = newExpandedNodes;
+        },
+        error => this.processNodes = null
+      );
+    }
   }
 
   get nodeKeys(): string[] {

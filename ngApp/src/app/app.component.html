@@ -9,7 +9,14 @@
 
   <div>
   <div class="content-right content-side">
-
+    <div *ngIf="authenticationService.loggedIn">
+      Welcome {{authenticationService.username}} <br/>
+      <button (click)="authenticationService.logout()"
+              pButton
+              icon="fa-sign-out"
+              label="Logout">
+      </button>
+    </div>
   </div>
 
   <div class="content-center">
@@ -21,7 +28,37 @@
   </div>
 </header>
 
-<p-tabView>
+<div class="login-div" *ngIf="!authenticationService.loggedIn">
+  <form #f="ngForm" (submit)="authenticationService.loginUser()">
+    <p-panel header="Login">
+      <label for="usernameInput">Username</label>
+      <input id="usernameInput"
+             name="usernameInput"
+             type="text"
+             [(ngModel)]="authenticationService.authUser"
+             class="full-parent-width" pInputText required>
+
+      <label for="passwordInput">Password</label>
+      <input id="passwordInput"
+             name="passwordInput"
+             type="password"
+             [(ngModel)]="authenticationService.authPass"
+             class="full-parent-width" pInputText required>
+
+      <br/><br/>
+
+      <button type="button"
+              type="submit"
+              pButton
+              icon="fa-sign-in"
+              label="Login">
+      </button>
+    </p-panel>
+  </form>
+
+</div>
+
+<p-tabView *ngIf="authenticationService.loggedIn">
   <p-tabPanel header="Status">
     <process-nodes></process-nodes>
 
@@ -57,5 +94,4 @@
   <div class="footer-contents">
     <img src="./assets/doe_sc_logo.png" />
   </div>
-
 </footer>

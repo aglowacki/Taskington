@@ -2,6 +2,7 @@ import {Component, ViewEncapsulation} from '@angular/core';
 import {SchedulerService, GrowlService} from "./service/services";
 import {Observable} from "rxjs";
 import {Jobs} from "./service/model/Jobs";
+import {AuthenticationService} from "./service/Authentication.service";
 
 @Component({
   selector: 'app-root',
@@ -20,8 +21,20 @@ export class AppComponent {
   processingJobs: Jobs;
   finishedJobs: Jobs;
 
-  constructor(private schedulerService: SchedulerService, public growlService: GrowlService) {
+  constructor(private schedulerService: SchedulerService,
+              public growlService: GrowlService,
+              public authenticationService: AuthenticationService) {
     this.loadData();
+
+    this.authenticationService.loginChange.subscribe(loggedIn => {
+      if (loggedIn){
+        this.loadData();
+      } else {
+        this.queuedJobs = null;
+        this.processingJobs = null;
+        this.finishedJobs = null;
+      }
+    });
 
     Observable.interval(4000).subscribe(() => {
       this.loadData();
@@ -29,7 +42,9 @@ export class AppComponent {
   }
 
   private loadData() {
-    this.loadJobs();
+    if (this.authenticationService.loggedIn) {
+      this.loadJobs();
+    }
   }
 
   private loadJobs() {

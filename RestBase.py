@@ -35,7 +35,7 @@ import logging.handlers
 
 class RestBase:
 	def __init__(self):
-		pass
+		self.logger = logging.getLogger(__name__)
 
 	def run(self):
 		raise RuntimeError("Need to Implement run method")
@@ -61,5 +61,6 @@ class RestBase:
 
 	def connect_all_routes(self, dispatcher, routes):
 		for route in routes:
+			self.logger.debug("Adding route: %s - %s (function: %s)" %(route.method, route.path, route.action))
 			dispatcher.connect(route.name, route.path, controller=route.controller,
 			                   action=route.action, conditions=dict(method=route.method))

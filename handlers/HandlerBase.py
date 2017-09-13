@@ -29,33 +29,35 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
 '''
-from handlers import HandlerBase
+import cherrypy
 
+ADD_OPTIONS_FUNCTION_NAME="addOptionsHeaders"
 
-class Route:
-	def __init__(self, function_name, http_method, controller, path=None):
-		path = Route.__getPath(path, function_name)
+class HandlerBase(object):
 
-		self.name = function_name
-		self.action = function_name
-		self.controller = controller
-		self.method = http_method
-		self.path = path
+	def __init__(self, devMode):
+		self.devMode = devMode
+
+	@cherrypy.expose
+	def addOptionsHeaders(self, *args, **kwargs):
+		if self.devMode:
+			options_headers = cherrypy.request.headers
+			cherrypy.response.headers['Access-Control-Allow-Origin'] = options_headers['Origin']
+			cherrypy.response.headers['Access-Control-Allow-Credentials'] = 'true'
+			cherrypy.response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE';
+			cherrypy.response.headers['Access-Control-Allow-Headers'] = options_headers['Access-Control-Request-Headers']
+			cherrypy.response.headers['Content-Type'] = 'text/html; charset=utf-8'
 
 	@staticmethod
-	def __getPath(path, function_name):
-		if path is None:
-			return '/%s' % function_name
-		return path
-
-
-	@staticmethod
-	def createRoutes(function_name, http_method, controller, includeOptionsHTTPMethodForPath=False, path=None):
-		routes = [];
-
-		routes.append(Route(function_name, http_method, controller, path));
-		if includeOptionsHTTPMethodForPath:
-			path = Route.__getPath(path, function_name)
-			routes.append(Route(HandlerBase.ADD_OPTIONS_FUNCTION_NAME, 'OPTIONS', controller, path))
-
-		return routes;
+	def execute(func):
+		def decorate(*args, **kwargs):
+			# self.devMode
+			if args[0].devMode:
+				cherrypy.response.headers['Access-Control-Allow-Credentials'] = 'true'
+			try:
+				response = func(*args, **kwargs)
+			except Exception, ex:
+				cherrypy.response.status = 500
+				return ex.message
+			return response
+		return decorate
