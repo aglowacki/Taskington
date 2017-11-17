@@ -52,13 +52,17 @@ def gen_job_dir_dict(text, opened, children):
 	return d_dict
 
 def get_dirs(path, level):
-	dir_list = [ {'id': os.path.join(path, name), 'parent':path, 'text': name} for name in os.listdir(path) if os.path.isdir(os.path.join(path, name)) ]
-	if level > 0:
-		level -= 1
-		new_list = []
-		for sub_path_dict in dir_list:
-			new_list += get_dirs(sub_path_dict['id'], level) 
-		dir_list += new_list
+	dir_list = []
+	try:
+		dir_list = [ {'id': os.path.join(path, name), 'parent':path, 'text': name} for name in os.listdir(path) if os.path.isdir(os.path.join(path, name)) ]
+		if level > 0:
+			level -= 1
+			new_list = []
+			for sub_path_dict in dir_list:
+				new_list += get_dirs(sub_path_dict['id'], level) 
+			dir_list += new_list
+	except:
+		pass
 	return dir_list
 
 class SchedulerHandler(object):
