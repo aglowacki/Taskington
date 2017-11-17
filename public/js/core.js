@@ -631,7 +631,7 @@
             });
         });
         
-        $("#Btn-Browse-cnm").click(function(e) 
+                 $("#Btn-Browse-production").click(function(e) 
         {
             $('.overlay').show();
             $('#jstree').jstree(
@@ -645,7 +645,41 @@
                         {
                             type: 'POST',
                             url:"/get_dataset_dirs_list",
-                            data: {'job_path': 'cnm', 'depth': 1},
+                            data: {'job_path': 'production', 'depth': 2},
+                            datatype: "json",
+                            success: function(rdata) 
+                            {
+                                callback.call(me, JSON.parse(rdata));
+                            },
+                            error: function(xhr, textStatus, errorThrown)
+                            {
+                                $.notify(xhr.responseText,  {
+                                    autoHide: false,
+                                    clickToHide: true
+                                });
+                            }
+                        });
+                    }
+                },
+                 "plugins" : [ "sort" ]
+            });
+        });
+        
+        $("#Btn-Browse-micdata").click(function(e) 
+        {
+            $('.overlay').show();
+            $('#jstree').jstree(
+            {
+                'core':
+                {
+                    'data' : function (obj, callback) 
+                    {
+                        var me = this;
+                         $.ajax(
+                        {
+                            type: 'POST',
+                            url:"/get_dataset_dirs_list",
+                            data: {'job_path': 'micdata', 'depth': 2},
                             datatype: "json",
                             success: function(rdata) 
                             {
