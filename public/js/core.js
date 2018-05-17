@@ -235,6 +235,7 @@
                            'Files processed in parrallel: '+d.Args.MaxFilesToProc+'<br>'+
                            'Live Job: '+d.Args.Is_Live_Job+'<br>'+
                            '<a href=/get_output_list?job_path='+d.DataPath+'>Output Directory</a> (output_old) <br>'+
+                           '<a href=/get_output_list?job_path='+d.DataPath+'&process_type=ORIG>Output Directory</a> (output)<br>'+
                            '<a href=/get_output_list?job_path='+d.DataPath+'&process_type=PER_PIXEL>Output Directory</a> (output.fits) Per Pixel Fitting<br>';
                            
             }

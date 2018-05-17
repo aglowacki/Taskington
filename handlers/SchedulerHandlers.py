@@ -81,7 +81,7 @@ class SchedulerHandler(object):
 									   },
 									   {
 										'Function': 'get_output_list',
-										'Parameters': 'job_path, process_type (PER_PIXEL or ROI)',
+										'Parameters': 'job_path, process_type (PER_PIXEL, ROI, or ORIG)',
 										'Description': 'Gets directory content for $job_path/output_old or $job_path/output.fit'
 									   },
 									   {
@@ -170,6 +170,9 @@ class SchedulerHandler(object):
 			if process_type == 'PER_PIXEL':
 				img_path = os.path.join(job_path, 'output.fits/*.png')
 				txt_path = os.path.join(job_path, 'output.fits/*.txt')
+			if process_type == 'ORIG':
+				img_path = os.path.join(job_path, 'output/*.png')
+				txt_path = os.path.join(job_path, 'output/*.csv')
 		retstr += '<ul>\n'
 		for link in glob.glob(img_path):
 			strLink = unicodedata.normalize('NFKD', link).encode('ascii', 'ignore')
