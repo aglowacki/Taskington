@@ -158,6 +158,8 @@ def start_job(log_name, alias_path, job_dict, options, exitcode):
 			key_f = 1
 		if proc_mask & 64 == 64:
 			args += ['--generate-avg-h5']
+		#default to version 9 layout 
+		args += ['--add-v9layout']
 		log_file = open('job_logs/' + log_name, 'w')
 		print args
 		if os.name == "nt":

@@ -2,7 +2,7 @@ import sys
 import requests
 import json
 
-xfm0_url = 'http://server:8080'
+xfm0_url = 'http://xfm0.xray.aps.anl.gov:8080'
 
 
 def call_post(s, url, payload):
@@ -81,9 +81,14 @@ if __name__ == '__main__':
 	#proc_options = sys.argv[2].split(',')
 	#print job_path, proc_options
 	url = xfm0_url + '/job'
-	job_dict = get_job_template(session, xfm0_url, 'Jupyter')
-	job_dict['Args']['Copy_Default_Notebooks'] = 1
-	job_dict['DataPath'] = '/data/Bayer'
+	job_dict = get_job_template(session, xfm0_url, 'XRF-Maps')
+	job_dict['Process_Node_Id'] = 1
+	job_dict['DataPath'] = '/mnt/xfm0-data2/data/2ide/2017-3/LLi03'
+	job_dict['DatasetFilesToProc'] = '2xfm_0175.mda'
+	job_dict['Args']['MaxLinesToProc'] = 20
+	job_dict['Args']['ProcMask'] = 1
+	job_dict['Args']['NNLS'] = 1
+	job_dict['Args']['QuickAndDirty'] = 1
 	#update_mapspy_job(job_dict, DataPath=job_path, proc_options=proc_options)
 	for key,val in job_dict.iteritems():
 		print key, val
@@ -93,3 +98,23 @@ if __name__ == '__main__':
 	#job_dict = get_job_template(session, xfm0_url, 'PtychoLib')
 	#print job_dict
 
+
+
+
+'''
+Status 0
+StartProcTime 0
+FinishProcTime 0
+DatasetFilesToProc
+Args {u'MaxLinesToProc': -1, u'MaxFilesToProc': 1, u'ProcMask': 0, u'DetectorElements': 4, u'XRF_Bin': 0, u'Standards': u'maps_standardinfo.txt', u'XANES_Scan': 0, u'NNLS': 0, u'Is_Live_Job': 0, u'DetectorToStartWith': 0, u'QuickAndDirty': 0}
+Log_Path
+DataPath
+Priority 5
+Process_Node_Id -1
+Version
+BeamLine
+Experiment XRF-Maps
+Emails
+IsConcurrent 0
+
+'''
