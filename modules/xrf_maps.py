@@ -19,7 +19,7 @@ JOB_MAX_FILES_TO_PROC = 'MaxFilesToProc'  # INTEGER
 JOB_MAX_LINES_TO_PROC = 'MaxLinesToProc'  # INTEGER
 JOB_QUICK_AND_DIRTY = 'QuickAndDirty'  # INTEGER
 JOB_XRF_BIN = 'XRF_Bin'  # INTEGER
-JOB_NNLS = 'NNLS'  # INTEGER
+#JOB_NNLS = 'NNLS'  # INTEGER
 JOB_XANES_SCAN = 'XANES_Scan'  # INTEGER
 JOB_DETECTOR_TO_START_WITH = 'DetectorToStartWith'  # INTEGER
 JOB_PROC_MASK = 'ProcMask'  # INTEGER
@@ -34,7 +34,7 @@ def gen_args_dict():
 		JOB_MAX_LINES_TO_PROC:-1,
 		JOB_QUICK_AND_DIRTY:0,
 		JOB_XRF_BIN:0,
-		JOB_NNLS:0,
+		#JOB_NNLS:0,
 		JOB_XANES_SCAN:0,
 		JOB_DETECTOR_TO_START_WITH:0,
 		JOB_PROC_MASK:0
@@ -74,12 +74,11 @@ def gen_email_attachments(alias_path, job_dict):
 		if analyzed_grp == None:
 			#logger.warning('Warning: %s did not find '+Constants.HDF5_GRP_ANALYZED, file_name)
 			return None
-		if job_args[JOB_NNLS] == 1:
+		#if job_args[JOB_NNLS] == 1:
+		if proc_mask & 1 == 1:
 			h5_grp = analyzed_grp[Constants.HDF5_GRP_NNLS]
-		elif proc_mask & 4 == 4:
+		if proc_mask & 4 == 4:
 			h5_grp = analyzed_grp[Constants.HDF5_GRP_FITS]
-		elif proc_mask & 1 == 1:
-			h5_grp = analyzed_grp[Constants.HDF5_GRP_ROI]
 		else:
 			#self.logger.warning('Warning: %s did not process XRF_ROI or XRF_FITS', file_name)
 			return None
@@ -115,8 +114,8 @@ def start_job(log_name, alias_path, job_dict, options, exitcode):
 		xrf_maps_exe = options['Exe']
 		args = [xrf_maps_exe]
 		args += ['--dir', alias_path]
-		if str(job_args[JOB_NNLS]).strip() == '1':
-			args += ['--nnls']
+		#if str(job_args[JOB_NNLS]).strip() == '1':
+		#	args += ['--nnls']
 		if str(job_args[JOB_QUICK_AND_DIRTY]).strip() == '1':
 			args += ['--quick-and-dirty']
 		mda_files = str(job_dict[Constants.JOB_DATASET_FILES_TO_PROC]).strip()
@@ -145,11 +144,11 @@ def start_job(log_name, alias_path, job_dict, options, exitcode):
 		key_d = 0
 		key_f = 0 # for netcdf to hdf5 future feature
 		if proc_mask & 1 == 1:
-			args += ['--roi', '--roi_plus']
+			args += ['--roi', '--nnls']
 		if proc_mask & 2 == 2:
 			args += ['--optimize-fit-override-params']
 		if proc_mask & 4 == 4:
-			args += ['--roi', '--roi_plus', '--matrix']
+			args += ['--roi', '--nnls', '--matrix']
 		if proc_mask & 8 == 8:
 			key_d = 1
 		if proc_mask & 16 == 16:

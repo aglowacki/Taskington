@@ -74,7 +74,14 @@
             {
                 if( (aData.Args.ProcMask & 1) === 1)
                 {
-                    $str += '(A) Analyze datasets using ROI and ROI+ :: ';
+                    if(aData.Experiment === 'XRF-Maps')
+                    {
+                      $str += '(A) Analyze datasets using ROI and NNLS :: ';
+                    }
+					else if (aData.Experiment === 'MapsPy')
+                    {
+                      $str += '(A) Analyze datasets using ROI and ROI+ :: ';
+                    }
                 }
                 if( (aData.Args.ProcMask & 2) === 2)
                 {
@@ -82,7 +89,14 @@
                 }
                 if( (aData.Args.ProcMask & 4) === 4)
                 {
-                    $str += '(C) Analyze datasets using ROI, ROI+ and per pixel fitting :: ';
+                    if(aData.Experiment === 'XRF-Maps')
+                    {
+                      $str += '(C) Analyze datasets using ROI, NNLS and per pixel fitting :: ';
+                    }
+					else if (aData.Experiment === 'MapsPy')
+                    {
+                      $str += '(C) Analyze datasets using ROI, ROI+ and per pixel fitting :: ';
+                    }
                 }
                 if( (aData.Args.ProcMask & 8) === 8)
                 {
@@ -139,7 +153,41 @@
             }
             return $str;
         }
+
+        //----------------------------------------------------------------------
         
+        function find_node_id_by_hostname(hostname)
+        {
+			var $id = -1;
+            $node_list = $pn_table.data();
+            $node_list.each( function (node)
+            {
+                if (node.Hostname === hostname)
+                {
+					$id = d.Process_Node_Id;
+					return;
+                }
+            });
+            return $id;
+        }
+        
+        //----------------------------------------------------------------------
+
+        function find_hostname_by_node_id(node_id)
+        {
+            $node_list = $pn_table.data();
+			var $name = "N/A";
+            $node_list.each( function (node)
+            {
+                if (node.Id === node_id)
+                {
+					$name = node.ComputerName;
+                    return;
+                }
+            });
+            return $name; 
+        }
+         
         //----------------------------------------------------------------------
 
         function create_job_data_table($id, $url)
@@ -155,6 +203,8 @@
                     $('td', nRow).eq(3).html($status);
                     var $procmask = convert_procmask_number_to_string(aData);
                     $('td', nRow).eq(4).html($procmask);
+                    var $computer =  find_hostname_by_node_id(aData.Process_Node_Id);
+                    $('td', nRow).eq(5).html($computer);
                 },
                 "columns": [
                 {
@@ -166,7 +216,8 @@
                 { "data": "Id" },
                 { "data": "DataPath" },
                 { "data": "Status" },
-                { "data": "BeamLine" },
+                { "data": "Args.ProcMask" },
+                { "data": "Process_Node_Id" },
                 {
                     "class":          "delete-control",
                     "orderable":      false,
@@ -178,22 +229,7 @@
             });
 
         }
-        
-        //----------------------------------------------------------------------
-        
-        function find_node_id_by_hostname(hostname)
-        {
-            $node_list = $pn_table.data();
-            $node_list.each( function (node)
-            {
-                if (node.Hostname === hostname)
-                {
-                    return d.Process_Node_Id;
-                }
-            });
-            return -1;
-        }
-        
+       
         //----------------------------------------------------------------------
         
         function format_job_details ( d ) 
@@ -230,7 +266,7 @@
                            'Detector Elements: '+d.Args.DetectorElements+'<br>'+
                            'Detector To Start With: '+d.Args.DetectorToStartWith+'<br>'+
                            'Quick and Dirty: '+d.Args.QuickAndDirty+'<br>'+
-                           'NNLS: '+d.Args.NNLS+'<br>'+
+                           //'NNLS: '+d.Args.NNLS+'<br>'+
                            'Lines processed in parrallel: '+d.Args.MaxLinesToProc+'<br>'+
                            'Files processed in parrallel: '+d.Args.MaxFilesToProc+'<br>'+
                            'Live Job: '+d.Args.Is_Live_Job+'<br>'+
@@ -365,7 +401,7 @@
             var $procMask = gen_job_mask();
             var $quickNdirty = get_check_value('#option-quick-and-dirty');
             var $xrfbin = 0; // get_check_value('#option-xrf-bin');
-            var $nnls = get_check_value('#option-nnls');
+            //var $nnls = get_check_value('#option-nnls');
             var $xanes = is_xrf_maps_job; //0 = mapspy , 1 = xrf maps  get_check_value('#option-xanes');
             var $is_live_job = get_check_value('#option-is-live-job');
             var $dataset_filenames = 'all';
@@ -379,7 +415,7 @@
             if (is_xrf_maps_job)
                 $experiment = 'XRF-Maps';
             
-            if($procMask === 0 && $nnls === 0)
+            if($procMask === 0)
             {
                 $.notify("No analysis type selected! Select A, B, C, D, E, or F", "error");
                 return;
@@ -413,7 +449,7 @@
                         'MaxFilesToProc': parseInt($("#option-proc-per-file").val(), 10),
                         'DetectorElements': parseInt($("#option-detector-elements").val(), 10),
                         'XANES_Scan': $xanes,
-                        'NNLS': $nnls,
+                        //'NNLS': $nnls,
                         'QuickAndDirty': $quickNdirty,
                         'Is_Live_Job': $is_live_job 
                             }
@@ -953,7 +989,8 @@
             }
             else
                 return;
-            
+           
+ 
             if (confirm("Are you sure you want to cancel this job?") == true) 
             {
                 //send 
@@ -979,6 +1016,7 @@
                 });
                 
             }
+
         });
         
         //----------------------------------------------------------------------
