@@ -10,6 +10,7 @@ import binascii
 import numpy as np
 from PIL import Image
 import os.path
+from shutil import copyfile
 
 
 # XRF JOB ARGS KEYS
@@ -53,12 +54,6 @@ def gen_email_attachments(alias_path, job_dict):
 		file_dir = os.path.join(alias_path, Constants.DIR_IMG_DAT)
 		job_args = job_dict[Constants.JOB_ARGS]
 		proc_mask = job_args[JOB_PROC_MASK]
-		# check if maps_fit_parameters_override.txt exists, if not, try to copy it from reference
-		fit_override_file = os.path.join(alias_path, 'maps_fit_parameters_override.txt')
-		if False == os.path.exists(fit_override_file):
-			copy_fit_override_file = job_dict[Constants.JOB_EXPERIMENT] + '_maps_fit_parameters_override.txt'
-			copy_fit_override_file = os.path.join('refecence', copy_fit_override_file)
-			os.copy(copy_fit_override_file, fit_override_file)
 		# will only check one file for images
 		if job_dict[Constants.JOB_DATASET_FILES_TO_PROC] == 'all':
 			#logger.warning('Warning: Too many datasets to parse images from')
@@ -121,6 +116,14 @@ def start_job(log_name, alias_path, job_dict, options, exitcode):
 		xrf_maps_exe = options['Exe']
 		args = [xrf_maps_exe]
 		args += ['--dir', alias_path]
+		# check if maps_fit_parameters_override.txt exists, if not, try to copy it from reference
+		fit_override_file = os.path.join(alias_path, 'maps_fit_parameters_override.txt')
+		if False == os.path.exists(fit_override_file):
+			cwd = os.getcwd()
+			cwd = os.path.join(cwd, 'reference')
+			copy_fit_override_file = job_dict[Constants.JOB_BEAM_LINE] + '_maps_fit_parameters_override.txt'
+			copy_fit_override_file = os.path.join(cwd, copy_fit_override_file)
+			copyfile(copy_fit_override_file, fit_override_file)
 		#if str(job_args[JOB_NNLS]).strip() == '1':
 		#	args += ['--nnls']
 		if str(job_args[JOB_QUICK_AND_DIRTY]).strip() == '1':
