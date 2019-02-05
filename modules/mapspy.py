@@ -16,7 +16,7 @@ JOB_MAX_FILES_TO_PROC = 'MaxFilesToProc'  # INTEGER
 JOB_MAX_LINES_TO_PROC = 'MaxLinesToProc'  # INTEGER
 JOB_QUICK_AND_DIRTY = 'QuickAndDirty'  # INTEGER
 JOB_XRF_BIN = 'XRF_Bin'  # INTEGER
-JOB_NNLS = 'NNLS'  # INTEGER
+#JOB_NNLS = 'NNLS'  # INTEGER
 JOB_XANES_SCAN = 'XANES_Scan'  # INTEGER
 JOB_DETECTOR_TO_START_WITH = 'DetectorToStartWith'  # INTEGER
 JOB_PROC_MASK = 'ProcMask'  # INTEGER
@@ -31,7 +31,7 @@ def gen_args_dict():
 		JOB_MAX_LINES_TO_PROC:-1,
 		JOB_QUICK_AND_DIRTY:0,
 		JOB_XRF_BIN:0,
-		JOB_NNLS:0,
+		#JOB_NNLS:0,
 		JOB_XANES_SCAN:0,
 		JOB_DETECTOR_TO_START_WITH:0,
 		JOB_PROC_MASK:0
@@ -116,7 +116,8 @@ def start_job(log_name, alias_path, job_dict, options, exitcode):
 		f.write('MAX_NUMBER_OF_LINES_TO_PROCESS:' + str(job_args[JOB_MAX_LINES_TO_PROC]).strip() + '\n')
 		f.write('QUICK_DIRTY:' + str(job_args[JOB_QUICK_AND_DIRTY]).strip() + '\n')
 		f.write('XRF_BIN:' + str(job_args[JOB_XRF_BIN]).strip() + '\n')
-		f.write('NNLS:' + str(job_args[JOB_NNLS]).strip() + '\n')
+		#f.write('NNLS:' + str(job_args[JOB_NNLS]).strip() + '\n')
+		f.write('NNLS: 0\n')
 		f.write('XANES_SCAN:' + str(job_args[JOB_XANES_SCAN]).strip() + '\n')
 		f.write('DETECTOR_TO_START_WITH:' + str(job_args[JOB_DETECTOR_TO_START_WITH]).strip() + '\n')
 		f.write('BEAMLINE:' + str(job_dict[Constants.JOB_BEAM_LINE]).strip() + '\n')
