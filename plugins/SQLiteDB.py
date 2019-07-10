@@ -118,7 +118,7 @@ def Gen_Insert_Into_Table(table, insert_dict):
 	ret_str += '('
 	values_str = ' )VALUES( '
 	for col in table['Columns']:
-		if insert_dict.has_key(col['Key']):
+		if col['Key'] in insert_dict:
 			ret_str += col['Key'] + ', '
 			if insert_dict[col['Key']] == None:
 				insert_dict[col['Key']] = col['Default_Value']
@@ -140,7 +140,7 @@ def Gen_Update_Table(table, update_dict, by_statement):
 	ret_str += ' SET '
 	cnt = 0
 	for col in table['Columns']:
-		if update_dict.has_key(col['Key']):
+		if col['Key'] in update_dict:
 			cnt += 1
 			if col['Type'] == 'TEXT' or col['Type'] == 'TIMESTAMP':
 				ret_str += col['Key'] + "='" + str(update_dict[col['Key']]) + "', "
@@ -185,7 +185,7 @@ class SQLiteDB:
 	def create_tables(self, drop=False):
 		con = sql.connect(self.uri)
 		cur = con.cursor()
-		for table in TABLES.itervalues():
+		for table in TABLES.values():
 			if drop:
 				drop_str = Gen_Drop(table['Name'])
 				cur.executescript(drop_str)
@@ -204,11 +204,11 @@ class SQLiteDB:
 		if type(proc_node_dict[Constants.PROCESS_NODE_SUPPORTED_SOFTWARE]) == type([]):
 			proc_node_dict[Constants.PROCESS_NODE_SUPPORTED_SOFTWARE] = json.dumps(proc_node_dict[Constants.PROCESS_NODE_SUPPORTED_SOFTWARE])
 		if row[0] == 0:
-			print 'insert',proc_node_dict
+			print( 'insert',proc_node_dict)
 			insert_str = Gen_Insert_Into_Table(TABLES[Constants.TABLE_PROCESS_NODES], proc_node_dict)
 			cur.execute(insert_str, proc_node_dict)
 		else:
-			print 'update', proc_node_dict
+			print( 'update', proc_node_dict)
 			str_by_statement = Constants.PROCESS_NODE_COMPUTERNAME + '=:' + Constants.PROCESS_NODE_COMPUTERNAME
 			update_str = Gen_Update_Table(TABLES[Constants.TABLE_PROCESS_NODES], proc_node_dict, str_by_statement)
 			cur.execute(update_str, proc_node_dict)
@@ -216,7 +216,7 @@ class SQLiteDB:
 
 	def insert_job(self, job_dict):
 		try:
-			print 'insert job', job_dict
+			print( 'insert job', job_dict)
 			if Constants.JOB_ARGS in job_dict:
 				#jenc = json.JSONEncoder()
 				#job_dict[Constants.JOB_ARGS] = jenc.encode(job_dict[Constants.JOB_ARGS])
@@ -332,7 +332,7 @@ class SQLiteDB:
 
 	def update_job(self, job_dict):
 		try:
-			print 'updating job', job_dict
+			print( 'updating job', job_dict)
 			saved_args = {}
 			if Constants.JOB_ARGS in job_dict:
 				saved_args = job_dict[Constants.JOB_ARGS]
@@ -349,7 +349,7 @@ class SQLiteDB:
 			return True
 		except:
 			exc_str = traceback.format_exc()
-			print exc_str
+			print (exc_str)
 			return False
 
 	def update_job_pn(self, job_id, pn_id):
@@ -406,43 +406,43 @@ if __name__ == '__main__':
 	proc_node = db.get_process_node_by_name(proc_node['ComputerName'])
 	db.insert_process_node(proc_node2)
 	proc_node2 = db.get_process_node_by_name(proc_node2['ComputerName'])
-	print db.get_process_node_by_name(proc_node['ComputerName'])
-	print ' '
-	print db.get_process_node_by_id(proc_node2['Id'])
-	print ' '
+	print (db.get_process_node_by_name(proc_node['ComputerName']))
+	print (' ')
+	print (db.get_process_node_by_id(proc_node2['Id']))
+	print (' ')
 	proc_node['Status'] = 'Offline'
 	proc_node['Heartbeat'] = datetime.now()
 	db.insert_process_node(proc_node)
-	print ' '
-	print db.get_process_node_by_id(proc_node['Id'])
+	print (' ')
+	print (db.get_process_node_by_id(proc_node['Id']))
 	db.reset_process_nodes_status()
-	print db.get_all_process_nodes()
-	print '-------------------------------'
+	print (db.get_all_process_nodes())
+	print ('-------------------------------')
 	#add job
 	xrf_job1['Id'] = db.insert_job(xrf_job1)
 	pty_job1['Id'] = db.insert_job(pty_job1)
 	xrf_job2['Id'] = db.insert_job(xrf_job2)
-	print db.get_all_jobs()
+	print (db.get_all_jobs())
 	db.update_job_pn(xrf_job1['Id'], proc_node['Id'])
 	db.update_job_pn(xrf_job2['Id'], proc_node2['Id'])
-	print ' '
-	print db.get_jobs_by_status(0)
-	print ' '
+	print (' ')
+	print (db.get_jobs_by_status(0))
+	print (' ')
 	xrf_job3['Id'] = 10
 	db.insert_job(xrf_job3)
-	print db.get_jobs_by_status(0)
-	print ' '
-	print db.get_all_jobs()
-	print ' '
+	print (db.get_jobs_by_status(0))
+	print (' ')
+	print( db.get_all_jobs())
+	print (' ')
 	xrf_job3['Status'] = 0
 	db.update_job(xrf_job3)
-	print db.get_all_unprocessed_jobs()
+	print (db.get_all_unprocessed_jobs())
 	db.delete_job_by_id(xrf_job2['Id'])
 	db.delete_job_by_id(xrf_job3['Id'])
-	print ' '
-	print db.get_all_jobs()
-	print db.get_job(xrf_job1['Id'])
-	print db.get_all_unprocessed_jobs_for_pn_id(proc_node['Id'])
-	print db.get_all_unprocessed_jobs_for_any_node()
-	print db.get_all_unprocessed_and_processing_jobs()
-	print db.get_all_processing_jobs()
+	print (' ')
+	print (db.get_all_jobs())
+	print (db.get_job(xrf_job1['Id']))
+	print (db.get_all_unprocessed_jobs_for_pn_id(proc_node['Id']))
+	print (db.get_all_unprocessed_jobs_for_any_node())
+	print (db.get_all_unprocessed_and_processing_jobs())
+	print (db.get_all_processing_jobs())

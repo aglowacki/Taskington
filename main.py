@@ -42,14 +42,14 @@ def main():
 	settings = Settings.SettingsIO()
 	settings.load(settings_filename)
 	if settings.checkSectionKeys(Settings.SECTION_SERVER, Settings.SERVER_KEYS) == False:
-		print 'Error: Could not find all settings in ',settings_filename
-		print 'Please add the following keys to',settings_filename,'under the section',Settings.SECTION_SERVER
+		print ('Error: Could not find all settings in ',settings_filename)
+		print ('Please add the following keys to',settings_filename,'under the section',Settings.SECTION_SERVER)
 		for key in Settings.SERVER_KEYS:
-			print key
+			print (key)
 		sys.exit(1)
 	serverSettings = settings.getSetting(Settings.SECTION_SERVER)
 	role = str(serverSettings[Settings.SERVER_ROLE])
-	print 'Role =',role
+	print ('Role =',role)
 	if role == 'scheduler':
 		from Scheduler import Scheduler
 		scheduler = Scheduler(settings)
@@ -59,7 +59,7 @@ def main():
 		process_node = ProcessNode(settings)
 		process_node.run()
 	else:
-		print 'Unknown role! Change settings.ini, Role: to either scheduler or process_node .  exiting!'
+		print ('Unknown role! Change settings.ini, Role: to either scheduler or process_node .  exiting!')
 
 if __name__ == '__main__':
 	main()
