@@ -154,11 +154,11 @@ def start_job(log_name, alias_path, job_dict, options, exitcode):
 		key_d = 0
 		key_f = 0 # for netcdf to hdf5 future feature
 		if proc_mask & 1 == 1:
-			args += ['--roi', '--nnls']
+			args += ['--fit'] + ['roi,nnls']
 		if proc_mask & 2 == 2:
 			args += ['--optimize-fit-override-params']
 		if proc_mask & 4 == 4:
-			args += ['--roi', '--nnls', '--matrix']
+			args += ['--fit'] + ['roi,nnls,matrix']
 		if proc_mask & 8 == 8:
 			key_d = 1
 		if proc_mask & 16 == 16:
