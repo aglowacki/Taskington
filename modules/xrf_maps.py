@@ -146,6 +146,7 @@ def start_job(log_name, alias_path, job_dict, options, exitcode):
 
 		str_detector_range = str(detector_start) + ':' + str(detector_end)
 		args += ['--detector-range', str_detector_range]
+		args += ['--export-csv']
 
 		if len(str(job_args[JOB_STANDARDS])) > 0:
 			args += ['--quantify-with', str(job_args[JOB_STANDARDS])]
