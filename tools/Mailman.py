@@ -54,7 +54,7 @@ class mailman:
 		msg['To'] = to_addresses
 		if images_dict != None:
 			img_text = '<br><br>'
-			for img_name in images_dict.iterkeys():
+			for img_name in images_dict.keys():
 				msg_img = MIMEImage(images_dict[img_name], Name=img_name)
 				msg_img.add_header('Content-ID', '<' + img_name + '>')
 				msg.attach(msg_img)

@@ -52,7 +52,7 @@ class ProcessNodeHandler(object):
 
 	@cherrypy.expose
 	def index(self):
-		return open('public/process_node_index.html')
+		return open('static/process_node_index.html')
 
 	@cherrypy.expose
 	def get_job_log(self, log_path):

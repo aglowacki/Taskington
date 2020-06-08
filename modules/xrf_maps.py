@@ -4,8 +4,7 @@ import traceback
 import os
 import glob
 import h5py
-import StringIO
-import scipy.misc
+import io
 import binascii
 import numpy as np
 from PIL import Image
@@ -95,7 +94,7 @@ def gen_email_attachments(alias_path, job_dict):
 			return None
 
 		for i in range(channel_names.size):
-			outbuf = StringIO.StringIO()
+			outbuf = io.StringIO()
 			I8 = (((xrf_dataset[i] - np.min(xrf_dataset[i])) / (np.max(xrf_dataset[i]) - np.min(xrf_dataset[i]))) * 255.9).astype(np.uint8)
 			img = Image.fromarray(I8,  mode='L')
 			img.save(outbuf, format='JPEG')
@@ -175,11 +174,11 @@ def start_job(log_name, alias_path, job_dict, options, exitcode):
 			exitcode = subprocess.call(args, cwd=xrf_maps_path, stdout=log_file, stderr=log_file, shell=True)
 		else:
 			exitcode = subprocess.call(args, cwd=xrf_maps_path, stdout=log_file, stderr=log_file, shell=False)
-		print 'exitcode = ', exitcode
+		print('exitcode = ', exitcode)
 		log_file.close()
 	except:
 		exc_str = traceback.format_exc()
-		print exc_str
+		print(exc_str)
 		exitcode = -1
 
 

@@ -9,9 +9,9 @@
         {
 
             if (limit < 0)
-                $finished_table.ajax.url("/get_all_finished_jobs");
+                $finished_table.ajax.url("/scheduler/get_all_finished_jobs");
             else
-                $finished_table.ajax.url("/get_all_finished_jobs?limit="+String(limit));
+                $finished_table.ajax.url("/scheduler/get_all_finished_jobs?limit="+String(limit));
             
         }
 
@@ -363,7 +363,7 @@
             $.ajax(
             {
                 type: 'POST',
-                url:"/get_mda_list",
+                url:"/scheduler/get_mda_list",
                 data: {'job_path': $(str_datapath_id).val()},
                 datatype: "json",
                 success: function(data)
@@ -424,7 +424,7 @@
             $.ajax(
             {
                 type: 'POST',
-                url:"/job",
+                url:"/scheduler/job",
                 contentType: 'application/json; charset=utf-8',
                 data: JSON.stringify({
                     'Experiment': $experiment,
@@ -506,7 +506,7 @@
             $.ajax(
             {
                 type: 'POST',
-                url:"/job",
+                url:"/scheduler/job",
                 contentType: 'application/json; charset=utf-8',
                 data: JSON.stringify({
                     'Experiment': 'PtychoLib',
@@ -613,7 +613,7 @@
                          $.ajax(
                         {
                             type: 'POST',
-                            url:"/get_dataset_dirs_list",
+                            url:"/scheduler/get_dataset_dirs_list",
                             data: {'job_path': 'verify', 'depth': 2},
                             datatype: "json",
                             success: function(rdata) 
@@ -647,7 +647,7 @@
                          $.ajax(
                         {
                             type: 'POST',
-                            url:"/get_dataset_dirs_list",
+                            url:"/scheduler/get_dataset_dirs_list",
                             data: {'job_path': 'production', 'depth': 2},
                             datatype: "json",
                             success: function(rdata) 
@@ -681,7 +681,7 @@
                          $.ajax(
                         {
                             type: 'POST',
-                            url:"/get_dataset_dirs_list",
+                            url:"/scheduler/get_dataset_dirs_list",
                             data: {'job_path': 'production', 'depth': 2},
                             datatype: "json",
                             success: function(rdata) 
@@ -715,7 +715,7 @@
                          $.ajax(
                         {
                             type: 'POST',
-                            url:"/get_dataset_dirs_list",
+                            url:"/scheduler/get_dataset_dirs_list",
                             data: {'job_path': 'micdata', 'depth': 2},
                             datatype: "json",
                             success: function(rdata) 
@@ -749,7 +749,7 @@
                          $.ajax(
                         {
                             type: 'POST',
-                            url:"/get_dataset_dirs_list",
+                            url:"/scheduler/get_dataset_dirs_list",
                             data: {'job_path': 'pty', 'depth': 1},
                             datatype: "json",
                             success: function(rdata) 
@@ -788,7 +788,7 @@
         {
             //"processing": true,
             //"serverSide": true,
-            "ajax": "/process_node",
+            "ajax": "/scheduler/process_node",
             "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull )
             {
                 var $bk_color = check_heartbeat_timestamp(aData);
@@ -842,9 +842,9 @@
         //--------------------------- init -------------------------------------
         //----------------------------------------------------------------------
 
-        var $queued_table = create_job_data_table("#table_unprocessed_jobs", "/get_all_unprocessed_jobs");
-        var $processing_table = create_job_data_table("#table_processing_jobs", "/get_all_processing_jobs");
-        var $finished_table = create_job_data_table("#table_finished_jobs", "/get_all_finished_jobs?limit=100");
+        var $queued_table = create_job_data_table("#table_unprocessed_jobs", "/scheduler/get_all_unprocessed_jobs");
+        var $processing_table = create_job_data_table("#table_processing_jobs", "/scheduler/get_all_processing_jobs");
+        var $finished_table = create_job_data_table("#table_finished_jobs", "/scheduler/get_all_finished_jobs?limit=100");
         $("#priority").val(5);
         $("#pty-priority").val(5);
         $("#pty-rotate").val(0);
@@ -877,12 +877,12 @@
             $queued_table.ajax.reload(null, false);
             $processing_table.ajax.reload(null, false);
             $pn_table.ajax.reload(null, false);
-        }, 4000);
+        }, 3000);
 	
         setInterval(function()
         {
             $finished_table.ajax.reload(null, false);
-        }, 10000);
+        }, 8000);
         
         //----------------------------------------------------------------------
         
@@ -997,7 +997,7 @@
                 $.ajax(
                 {
                     type: 'DELETE',
-                    url:"/job",
+                    url:"/scheduler/job",
                     contentType: 'application/json; charset=utf-8',
                     data: JSON.stringify(row.data()),
                     datatype: "json",
@@ -1071,5 +1071,6 @@
         });
         
         //----------------------------------------------------------------------
-        
+        $.fn.dataTable.ext.errMode = 'throw';
+
     });

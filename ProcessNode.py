@@ -90,10 +90,6 @@ class ProcessNode(RestBase):
 				'tools.response_headers.on': True,
 				'tools.response_headers.headers': [('Content-Type', 'text/plain')],
 				'request.methods_with_bodies': ('POST', 'PUT', 'DELETE')
-			},
-			'/static': {
-				'tools.staticdir.on': True,
-				'tools.staticdir.dir': './public'
 			}
 		}
 		self.logger = logging.getLogger(__name__)
@@ -118,8 +114,8 @@ class ProcessNode(RestBase):
 		self.path_alias_dict = self.parse_json_file(pnSettings[Settings.PROCESS_NODE_PATH_ALIAS])
 		self.logger.info('alias paths %s', self.path_alias_dict)
 		self.session = requests.Session()
-		self.scheduler_pn_url = 'http://' + self.scheduler_host + ':' + self.scheduler_port + '/process_node'
-		self.scheduler_job_url = 'http://' + self.scheduler_host + ':' + self.scheduler_port + '/job'
+		self.scheduler_pn_url = 'http://' + self.scheduler_host + ':' + self.scheduler_port + '/scheduler/process_node'
+		self.scheduler_job_url = 'http://' + self.scheduler_host + ':' + self.scheduler_port + '/scheduler/job'
 		self.db_name = pnSettings[Settings.PROCESS_NODE_DATABASE_NAME]
 		self.db = DatabasePlugin(cherrypy.engine, SQLiteDB, self.db_name)
 		cherrypy.engine.subscribe("new_job", self.callback_new_job)
@@ -222,7 +218,7 @@ class ProcessNode(RestBase):
 				#if not self.status_thread.is_alive():
 				#	self.status_thread = threading.Thread(target=self.status_thread_func)
 				#	self.status_thread.start()
-				for key,value in self.running_jobs.iteritems():
+				for key,value in self.running_jobs.items():
 					proc2 = value[1]
 					if proc2.exitcode == None and proc2.is_alive():
 						continue
@@ -284,7 +280,7 @@ class ProcessNode(RestBase):
 
 	def check_for_alias(self, directory_str, alias_dict):
 		ret_str = directory_str
-		for key in alias_dict.iterkeys():
+		for key in alias_dict.keys():
 			if directory_str.startswith(key):
 				ret_str = directory_str.replace(key, alias_dict[key])
 				break

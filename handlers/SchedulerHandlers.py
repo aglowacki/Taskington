@@ -137,10 +137,6 @@ class SchedulerHandler(object):
 		return ret_str
 
 	@cherrypy.expose
-	def index(self):
-		return open('public/scheduler_index.html')
-
-	@cherrypy.expose
 	def api(self):
 		return self.show_api()
 
@@ -199,7 +195,7 @@ class SchedulerHandler(object):
 			dir_list = [{'id': '/', 'parent': '#', 'text': 'All', 'state': {'opened': True}}]
 			#dir_list = {'id': 0, 'parent': '#', 'text': 'All', 'state': {'opened': True}}
 			#return json.JSONEncoder().encode(dir_list)
-			for key, value in job_roots_dict.iteritems():
+			for key, value in job_roots_dict.items():
 				dir_list += [{'id': value, 'parent': '/', 'text': key, 'state': {'opened': False}}]
 				dir_list += get_dirs(value, depth)
 			jenc = json.JSONEncoder()
