@@ -15,14 +15,12 @@ from shutil import copyfile
 # XRF JOB ARGS KEYS
 JOB_IS_LIVE_JOB = 'Is_Live_Job'  # INTEGER
 JOB_STANDARDS = 'Standards'  # TEXT
-JOB_DETECTOR_ELEMENTS = 'DetectorElements'  # INTEGER
+JOB_DETECTOR_LIST = 'DetectorList'  # TEXT
 JOB_MAX_FILES_TO_PROC = 'MaxFilesToProc'  # INTEGER
 JOB_MAX_LINES_TO_PROC = 'MaxLinesToProc'  # INTEGER
 JOB_QUICK_AND_DIRTY = 'QuickAndDirty'  # INTEGER
 JOB_XRF_BIN = 'XRF_Bin'  # INTEGER
-#JOB_NNLS = 'NNLS'  # INTEGER
 JOB_XANES_SCAN = 'XANES_Scan'  # INTEGER
-JOB_DETECTOR_TO_START_WITH = 'DetectorToStartWith'  # INTEGER
 JOB_PROC_MASK = 'ProcMask'  # INTEGER
 
 
@@ -30,14 +28,12 @@ def gen_args_dict():
 	return {
 		JOB_IS_LIVE_JOB:0,
 		JOB_STANDARDS:'maps_standardinfo.txt',
-		JOB_DETECTOR_ELEMENTS:4,
+		JOB_DETECTOR_LIST:'0,1,2,3',
 		JOB_MAX_FILES_TO_PROC:1,
 		JOB_MAX_LINES_TO_PROC:-1,
 		JOB_QUICK_AND_DIRTY:0,
 		JOB_XRF_BIN:0,
-		#JOB_NNLS:0,
 		JOB_XANES_SCAN:0,
-		JOB_DETECTOR_TO_START_WITH:0,
 		JOB_PROC_MASK:0
 	}
 
@@ -65,7 +61,11 @@ def gen_email_attachments(alias_path, job_dict):
 			if proc_mask & 64 == 64: #generate avg
 				full_file_name = os.path.join(file_dir, temp_name + '.h5')
 			else:
-				full_file_name = os.path.join(file_dir, temp_name + '.h5' + str(job_args[JOB_DETECTOR_TO_START_WITH] ))
+				det_list = str(job_args[JOB_DETECTOR_LIST] )
+				if ',' in det_list:
+					full_file_name = os.path.join(file_dir, temp_name + '.h5' + det_list[0])
+				else:
+					full_file_name = os.path.join(file_dir, temp_name + '.h5' + det_list)
 
 		hdf_file = h5py.File(full_file_name, 'r')
 		maps_group = hdf_file[Constants.HDF5_GRP_MAPS]
@@ -123,8 +123,6 @@ def start_job(log_name, alias_path, job_dict, options, exitcode):
 			copy_fit_override_file = job_dict[Constants.JOB_BEAM_LINE] + '_maps_fit_parameters_override.txt'
 			copy_fit_override_file = os.path.join(cwd, copy_fit_override_file)
 			copyfile(copy_fit_override_file, fit_override_file)
-		#if str(job_args[JOB_NNLS]).strip() == '1':
-		#	args += ['--nnls']
 		if str(job_args[JOB_QUICK_AND_DIRTY]).strip() == '1':
 			args += ['--quick-and-dirty']
 		mda_files = str(job_dict[Constants.JOB_DATASET_FILES_TO_PROC]).strip()
@@ -134,23 +132,14 @@ def start_job(log_name, alias_path, job_dict, options, exitcode):
 		if not num_threads == '-1':
 			args += ['--nthreads', num_threads]
 
-		detector_start = int( str(job_args[JOB_DETECTOR_TO_START_WITH]).strip() )
-		detector_amount = int( str(job_args[JOB_DETECTOR_ELEMENTS]).strip() )
-		detector_end = detector_start + (detector_amount -1)
-
-		if detector_start < 0 or detector_start > 3: # we only have 4 detectors
-			detector_start = 0
-		if detector_end < detector_start or detector_end > 3: # we only have 4 detectors
-			detector_end = 3
-
-		str_detector_range = str(detector_start) + ':' + str(detector_end)
-		args += ['--detector-range', str_detector_range]
+		args += ['--detectors', str(job_args[JOB_DETECTOR_LIST]).strip()]
+		args += ['--export-csv']
 
 		if len(str(job_args[JOB_STANDARDS])) > 0:
 			args += ['--quantify-with', str(job_args[JOB_STANDARDS])]
 
 		proc_mask = int(job_args[JOB_PROC_MASK])
-		key_d = 0
+		key_d = 0 # legacy unused
 		key_f = 0 # for netcdf to hdf5 future feature
 		if proc_mask & 1 == 1:
 			args += ['--fit'] + ['roi,nnls']
@@ -169,16 +158,11 @@ def start_job(log_name, alias_path, job_dict, options, exitcode):
 		#default to version 9 layout 
 		args += ['--add-v9layout']
 		log_file = open('job_logs/' + log_name, 'w')
-		#print args
 		if os.name == "nt":
 			exitcode = subprocess.call(args, cwd=xrf_maps_path, stdout=log_file, stderr=log_file, shell=True)
 		else:
 			exitcode = subprocess.call(args, cwd=xrf_maps_path, stdout=log_file, stderr=log_file, shell=False)
-		print('exitcode = ', exitcode)
 		log_file.close()
 	except:
 		exc_str = traceback.format_exc()
-		print(exc_str)
 		exitcode = -1
-
-

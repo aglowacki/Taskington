@@ -401,7 +401,6 @@
             var $procMask = gen_job_mask();
             var $quickNdirty = get_check_value('#option-quick-and-dirty');
             var $xrfbin = 0; // get_check_value('#option-xrf-bin');
-            //var $nnls = get_check_value('#option-nnls');
             var $xanes = is_xrf_maps_job; //0 = mapspy , 1 = xrf maps  get_check_value('#option-xanes');
             var $is_live_job = get_check_value('#option-is-live-job');
             var $dataset_filenames = 'all';
@@ -442,14 +441,12 @@
                     'IsConcurrent': $is_live_job,
                     'Args': {
                         'ProcMask': $procMask,
-                        'Standards': 'maps_standardinfo.txt', //$("#option-standard").val(),
-                        'DetectorToStartWith': parseInt($("#option-detector-to-start-with").val(), 10),
+                        'Standards': 'maps_standardinfo.txt',
                         'XRF_Bin': $xrfbin,
                         'MaxLinesToProc': parseInt($("#option-proc-per-line").val(), 10),
                         'MaxFilesToProc': parseInt($("#option-proc-per-file").val(), 10),
-                        'DetectorElements': parseInt($("#option-detector-elements").val(), 10),
+                        'DetectorList': $("#option-detector-list"),
                         'XANES_Scan': $xanes,
-                        //'NNLS': $nnls,
                         'QuickAndDirty': $quickNdirty,
                         'Is_Live_Job': $is_live_job 
                             }
