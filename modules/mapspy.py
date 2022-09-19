@@ -11,14 +11,12 @@ import binascii
 # XRF JOB ARGS KEYS
 JOB_IS_LIVE_JOB = 'Is_Live_Job'  # INTEGER
 JOB_STANDARDS = 'Standards'  # TEXT
-JOB_DETECTOR_ELEMENTS = 'DetectorElements'  # INTEGER
+JOB_DETECTOR_LIST = 'DetectorList'  # TEXT
 JOB_MAX_FILES_TO_PROC = 'MaxFilesToProc'  # INTEGER
 JOB_MAX_LINES_TO_PROC = 'MaxLinesToProc'  # INTEGER
 JOB_QUICK_AND_DIRTY = 'QuickAndDirty'  # INTEGER
 JOB_XRF_BIN = 'XRF_Bin'  # INTEGER
-#JOB_NNLS = 'NNLS'  # INTEGER
 JOB_XANES_SCAN = 'XANES_Scan'  # INTEGER
-JOB_DETECTOR_TO_START_WITH = 'DetectorToStartWith'  # INTEGER
 JOB_PROC_MASK = 'ProcMask'  # INTEGER
 
 
@@ -26,14 +24,12 @@ def gen_args_dict():
 	return {
 		JOB_IS_LIVE_JOB:0,
 		JOB_STANDARDS:'maps_standardinfo.txt',
-		JOB_DETECTOR_ELEMENTS:4,
+		JOB_DETECTOR_LIST:'0,1,2,3',
 		JOB_MAX_FILES_TO_PROC:1,
 		JOB_MAX_LINES_TO_PROC:-1,
 		JOB_QUICK_AND_DIRTY:0,
 		JOB_XRF_BIN:0,
-		#JOB_NNLS:0,
 		JOB_XANES_SCAN:0,
-		JOB_DETECTOR_TO_START_WITH:0,
 		JOB_PROC_MASK:0
 	}
 
@@ -45,7 +41,7 @@ def gen_email_attachments(alias_path, job_dict):
 		images_dict = {}
 		full_file_name = ''
 		# check how many datasets are in job
-		file_name = ''
+		#file_name = ''
 		file_dir = os.path.join(alias_path, Constants.DIR_IMG_DAT)
 		job_args = job_dict[Constants.JOB_ARGS]
 		proc_mask = job_args[JOB_PROC_MASK]
@@ -105,21 +101,30 @@ def start_job(log_name, alias_path, job_dict, options, exitcode):
 	#_log_name = log_name
 	logger, fHandler = maps_batch.setup_logger('job_logs/' + log_name)
 	logger.info('Start Job Process')
+	detector_start = '0' 
+	detector_elements = '4' 
+	detector_list = str(job_args[JOB_DETECTOR_LIST]).strip()
+	if ',' in detector_list:
+		dlist = detector_list.split(',')
+		detector_start = dlist[0]
+		detector_elements = str(len(dlist))
+	else:
+		detector_start = detector_list
+		detector_elements = '1'
 	try:
 		os.chdir(options['Path'])
 		maps_set_str = os.path.join(str(alias_path), 'maps_settings.txt')
 		f = open(maps_set_str, 'w')
 		f.write('	  This file will set some MAPS settings mostly to do with fitting' + '\n')
 		f.write('VERSION:' + str(job_dict[Constants.JOB_VERSION]).strip() + '\n')
-		f.write('DETECTOR_ELEMENTS:' + str(job_args[JOB_DETECTOR_ELEMENTS]).strip() + '\n')
+		f.write('DETECTOR_ELEMENTS:' + detector_elements + '\n')
 		f.write('MAX_NUMBER_OF_FILES_TO_PROCESS:' + str(job_args[JOB_MAX_FILES_TO_PROC]).strip() + '\n')
 		f.write('MAX_NUMBER_OF_LINES_TO_PROCESS:' + str(job_args[JOB_MAX_LINES_TO_PROC]).strip() + '\n')
 		f.write('QUICK_DIRTY:' + str(job_args[JOB_QUICK_AND_DIRTY]).strip() + '\n')
 		f.write('XRF_BIN:' + str(job_args[JOB_XRF_BIN]).strip() + '\n')
-		#f.write('NNLS:' + str(job_args[JOB_NNLS]).strip() + '\n')
 		f.write('NNLS: 0\n')
 		f.write('XANES_SCAN:' + str(job_args[JOB_XANES_SCAN]).strip() + '\n')
-		f.write('DETECTOR_TO_START_WITH:' + str(job_args[JOB_DETECTOR_TO_START_WITH]).strip() + '\n')
+		f.write('DETECTOR_TO_START_WITH:' + detector_start + '\n')
 		f.write('BEAMLINE:' + str(job_dict[Constants.JOB_BEAM_LINE]).strip() + '\n')
 		f.write('DatasetFilesToProc:' + str(job_dict[Constants.JOB_DATASET_FILES_TO_PROC]).strip() + '\n')
 		standard_filenames = job_args[JOB_STANDARDS].split(';')
