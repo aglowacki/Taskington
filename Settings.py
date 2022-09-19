@@ -1,4 +1,4 @@
-import ConfigParser
+import configparser
 
 
 #Keys read from ConfigParser are all lower cased!
@@ -50,11 +50,11 @@ SECTIONS = [SECTION_SERVER, SECTION_PROCESS_NODE, SECTION_MONITOR]
 
 class SettingsIO:
 	def __init__(self):
-		self.config = ConfigParser.ConfigParser()
+		self.config = configparser.ConfigParser()
 		self.settingDicts = dict()
 
 	def load(self, filename):
-		print 'Settings loading file:', filename
+		print ('Settings loading file:', filename)
 		self.config.read(filename)
 		for sec in self.config.sections():
 			self.settingDicts[sec] = self.__get_sect_dict__(sec)
@@ -69,7 +69,7 @@ class SettingsIO:
 		for k in keys:
 			sect = self.getSetting(section_name)
 			if not k in sect:
-				print 'Could not find Key:', k, 'in server settings'
+				print ('Could not find Key:', k, 'in server settings')
 				return False
 		return True
 
@@ -90,6 +90,6 @@ if __name__ == '__main__':
 	# test
 	s = SettingsIO()
 	s.load('settings.ini')
-	print 'all sections',s.settingDicts.keys()
+	print ('all sections',s.settingDicts.keys())
 	schedDict = s.getSetting('Scheduler')
-	print 'scheduler section', schedDict.keys()
+	print ('scheduler section', schedDict.keys())

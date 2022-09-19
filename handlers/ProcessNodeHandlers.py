@@ -52,7 +52,7 @@ class ProcessNodeHandler(object):
 
 	@cherrypy.expose
 	def index(self):
-		return file('public/process_node_index.html')
+		return open('static/process_node_index.html')
 
 	@cherrypy.expose
 	def get_job_log(self, log_path):
@@ -85,14 +85,14 @@ class ProcessNodeHandler(object):
 				#ret_str = '<!DOCTYPE html><html><head></head><body>' + str(ver[0]) + '</body></html>'
 				#return ret_str
 			else:
-				return file(self.software_dict[software]['Version_File'])
+				return open(self.software_dict[software]['Version_File'])
 		else:
 			return 'Unknown software: ' + software
 
 	@cherrypy.expose
 	def version_file(self, software):
 		if self.software_dict.has_key(software):
-			return file(self.software_dict[software]['Version_File'])
+			return open(self.software_dict[software]['Version_File'])
 		else:
 			return 'Unknown software: ' + software
 

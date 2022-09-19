@@ -137,10 +137,6 @@ class SchedulerHandler(object):
 		return ret_str
 
 	@cherrypy.expose
-	def index(self):
-		return file('public/scheduler_index.html')
-
-	@cherrypy.expose
 	def api(self):
 		return self.show_api()
 
@@ -160,7 +156,7 @@ class SchedulerHandler(object):
 
 	@cherrypy.expose
 	def get_output_list(self, job_path=None, process_type=None):
-		rfile = file('public/get_output_list.html')
+		rfile = open('public/get_output_list.html')
 		retstr = rfile.read()
 		# default directory is output_old, but if it is matrix fit then use output.fit
 		img_path = os.path.join(job_path, 'output_old/*.png')
@@ -175,13 +171,13 @@ class SchedulerHandler(object):
 				txt_path = os.path.join(job_path, 'output/*.csv')
 		retstr += '<ul>\n'
 		for link in glob.glob(img_path):
-			strLink = unicodedata.normalize('NFKD', link).encode('ascii', 'ignore')
+			strLink = unicodedata.normalize('NFKD', link).encode('ascii', 'ignore').decode('utf8')
 			subname = strLink.split('/')
 			name = subname[len(subname) -1]
 			retstr += '<li><a href=/get_spectrum_image?path=' + strLink.replace('+', '%2b') + ' click=display_image link=' + strLink.replace('+', '%2b') + '>' + name + '</a></li>\n'
 		retstr += '</ul>\n<ul>\n'
 		for link in glob.glob(txt_path):
-			strLink = unicodedata.normalize('NFKD', link).encode('ascii', 'ignore')
+			strLink = unicodedata.normalize('NFKD', link).encode('ascii', 'ignore').decode('utf8')
 			subname = strLink.split('/')
 			#print subname
 			name = subname[len(subname) -1]
@@ -199,7 +195,7 @@ class SchedulerHandler(object):
 			dir_list = [{'id': '/', 'parent': '#', 'text': 'All', 'state': {'opened': True}}]
 			#dir_list = {'id': 0, 'parent': '#', 'text': 'All', 'state': {'opened': True}}
 			#return json.JSONEncoder().encode(dir_list)
-			for key, value in job_roots_dict.iteritems():
+			for key, value in job_roots_dict.items():
 				dir_list += [{'id': value, 'parent': '/', 'text': key, 'state': {'opened': False}}]
 				dir_list += get_dirs(value, depth)
 			jenc = json.JSONEncoder()
@@ -251,7 +247,7 @@ class SchedulerHandler(object):
 		if self.check_path(path) == True:
 			with open(path, "rb") as image_file:
 				encoded_string = base64.b64encode(image_file.read())
-			retstr = '<img alt="My Image" src="data:image/png;base64,' + encoded_string + '" />'
+			retstr = b'<img alt="My Image" src="data:image/png;base64,' + encoded_string + b'" />'
 			return retstr
 		else:
 			return "Error: file not file "+path
@@ -298,7 +294,6 @@ class SchedulerHandler(object):
 		limit = None
 		if 'limit' in data_dict.keys():
 			limit = str(data_dict['limit'])
-			print limit
 		data_dict['data'] = self.db.get_all_finished_jobs(limit)
 		data_dict['recordsTotal'] = len(data_dict['data'])
 		data_dict['recordsFiltered'] = len(data_dict['data'])
