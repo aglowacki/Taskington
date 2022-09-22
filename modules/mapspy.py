@@ -3,7 +3,7 @@ import os
 import glob
 import sys
 import h5py
-import StringIO
+from io import StringIO
 from PIL import Image
 import numpy as np
 import binascii
@@ -76,7 +76,7 @@ def gen_email_attachments(alias_path, job_dict):
 			return None
 
 		for i in range(channel_names.size):
-			outbuf = StringIO.StringIO()
+			outbuf = StringIO()
 			I8 = (((xrf_dataset[i] - np.min(xrf_dataset[i])) / (np.max(xrf_dataset[i]) - np.min(xrf_dataset[i]))) * 255.9).astype(np.uint8)
 			img = Image.fromarray(I8,  mode='L')
 			img.save(outbuf, format='JPEG')

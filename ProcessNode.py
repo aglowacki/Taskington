@@ -114,8 +114,8 @@ class ProcessNode(RestBase):
 		self.path_alias_dict = self.parse_json_file(pnSettings[Settings.PROCESS_NODE_PATH_ALIAS])
 		self.logger.info('alias paths %s', self.path_alias_dict)
 		self.session = requests.Session()
-		self.scheduler_pn_url = 'http://' + self.scheduler_host + ':' + self.scheduler_port + '/scheduler/process_node'
-		self.scheduler_job_url = 'http://' + self.scheduler_host + ':' + self.scheduler_port + '/scheduler/job'
+		self.scheduler_pn_url = 'http://' + self.scheduler_host + ':' + self.scheduler_port + '/process_node'
+		self.scheduler_job_url = 'http://' + self.scheduler_host + ':' + self.scheduler_port + '/job'
 		self.db_name = pnSettings[Settings.PROCESS_NODE_DATABASE_NAME]
 		self.db = DatabasePlugin(cherrypy.engine, SQLiteDB, self.db_name)
 		cherrypy.engine.subscribe("new_job", self.callback_new_job)
@@ -188,8 +188,9 @@ class ProcessNode(RestBase):
 		try:
 			self.logger.info('posting to scheduler %s', self.scheduler_pn_url)
 			self.session.post(self.scheduler_pn_url, data=json.dumps(self.pn_info))
-		except:
+		except Exception as e:
 			self.logger.error('Error sending post')
+			self.logger.exception(e)
 			#print datetime.now(), 'Error sending post'
 		self.pn_info[Constants.PROCESS_NODE_STATUS] = Constants.PROCESS_NODE_STATUS_IDLE
 		#  On startup check to see if we had processing jobs and set them as failed. TODO: restart the job instead
@@ -255,7 +256,8 @@ class ProcessNode(RestBase):
 					self.pn_info[Constants.PROCESS_NODE_STATUS] = Constants.PROCESS_NODE_STATUS_IDLE
 				if self.running:
 					self.send_status_update()
-		except:
+		except Exception as e:
+			self.logger.exception(e)
 			self.logger.exception('run error')
 			self.stop()
 
@@ -359,17 +361,19 @@ class ProcessNode(RestBase):
 			self.pn_info[Constants.PROCESS_NODE_SYSTEM_SWAP_PERCENT] = psutil.swap_memory().percent
 			#self.pn_info[Constants.PROCESS_NODE_QUEUED_JOBS] = len(self.running_jobs.keys())
 			self.session.put(self.scheduler_pn_url, data=json.dumps(self.pn_info))
-		except:
+		except Exception as e:
 			#exc_str = traceback.format_exc()
 			#print exc_str
+			self.logger.exception(e)
 			self.logger.error('Error sending status update')
 
 	def send_job_update(self, job_dict):
 		try:
 			self.session.put(self.scheduler_job_url, params=self.pn_info, data=json.dumps(job_dict))
 			self.logger.info('sent job status %s', job_dict)
-		except:
+		except Exception as e:
 			#exc_str = traceback.format_exc()
 			#print exc_str
+			self.logger.exception(e)
 			self.logger.exception('Error sending job update')
 
