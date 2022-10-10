@@ -75,7 +75,7 @@ class ProcessNodeHandler(object):
 
 	@cherrypy.expose
 	def version(self, software):
-		if self.software_dict.has_key(software):
+		if software in self.software_dict:
 			ver = [re.findall(r'<b>Revision<\/b>:\s*([^\n\r]*)', line) for line in open(self.software_dict[software]['Version_File'])]
 			# remove empty's
 			ver = [x for x in ver if x]
@@ -91,7 +91,7 @@ class ProcessNodeHandler(object):
 
 	@cherrypy.expose
 	def version_file(self, software):
-		if self.software_dict.has_key(software):
+		if software in self.software_dict:
 			return open(self.software_dict[software]['Version_File'])
 		else:
 			return 'Unknown software: ' + software
