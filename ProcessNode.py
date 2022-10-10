@@ -126,7 +126,7 @@ class ProcessNode(RestBase):
 		cherrypy.engine.subscribe("update_id", self.callback_update_id)
 		cherrypy.engine.subscribe("delete_job", self.callback_delete_job)
 		cherrypy.engine.subscribe("send_job_update", self.callback_send_job_update)
-		for item in self.software_dict.keys():
+		for item in list(self.software_dict.keys()):
 			self.pn_info[Constants.PROCESS_NODE_SUPPORTED_SOFTWARE] += [item]
 		self.create_directories()
 		self.running = True
@@ -223,7 +223,7 @@ class ProcessNode(RestBase):
 				#if not self.status_thread.is_alive():
 				#	self.status_thread = threading.Thread(target=self.status_thread_func)
 				#	self.status_thread.start()
-				for key,value in self.running_jobs.items():
+				for key,value in list(self.running_jobs.items()):
 					proc2 = value[1]
 					if proc2.exitcode == None and proc2.is_alive():
 						continue
@@ -286,7 +286,7 @@ class ProcessNode(RestBase):
 
 	def check_for_alias(self, directory_str, alias_dict):
 		ret_str = directory_str
-		for key in alias_dict.keys():
+		for key in list(alias_dict.keys()):
 			if directory_str.startswith(key):
 				ret_str = directory_str.replace(key, alias_dict[key])
 				break

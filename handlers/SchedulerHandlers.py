@@ -317,7 +317,7 @@ class SchedulerHandler(object):
 				if result.status_code == 200:
 					job_dict[Constants.JOB_ARGS] = json.loads(result.text)
 				#  remove job_id so it will be assigned a new one instead of -1
-				if job_dict.has_key(Constants.JOB_ID):
+				if Constants.JOB_ID in job_dict:
 					job_dict.pop(Constants.JOB_ID)
 				jenc = json.JSONEncoder()
 				return jenc.encode(job_dict)
