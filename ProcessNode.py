@@ -93,7 +93,7 @@ class ProcessNode(RestBase):
             },
             '/static': {
                 'tools.staticdir.on': True,
-                'tools.staticdir.dir': './public'
+                'tools.staticdir.dir': 'public'
 			}
 		}
 		self.logger = logging.getLogger(__name__)
