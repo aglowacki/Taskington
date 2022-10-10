@@ -90,6 +90,10 @@ class ProcessNode(RestBase):
 				'tools.response_headers.on': True,
 				'tools.response_headers.headers': [('Content-Type', 'text/plain')],
 				'request.methods_with_bodies': ('POST', 'PUT', 'DELETE')
+            },
+            '/static': {
+                'tools.staticdir.on': True,
+                'tools.staticdir.dir': './public'
 			}
 		}
 		self.logger = logging.getLogger(__name__)

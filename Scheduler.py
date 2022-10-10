@@ -103,6 +103,16 @@ class Scheduler(RestBase):
 				'tools.response_headers.on': True,
 				'tools.response_headers.headers': [('Content-Type', 'text/plain')],
 				'request.methods_with_bodies': ('POST', 'PUT', 'DELETE')
+            },
+            '/static': {
+                'tools.staticdir.on': True,
+                'tools.staticdir.dir': './public',
+                'tools.sessions.on': False,
+                'tools.caching.on': False,
+                'tools.caching.force' : False,
+                'tools.caching.delay' : 0,
+                'tools.expires.on' : False,
+                'tools.expires.secs' : 60*24*365
 			}
 		}
 
@@ -309,7 +319,7 @@ class Scheduler(RestBase):
 		webapp = SchedulerHandler(db, self.all_settings)
 		webapp.process_node = SchedulerProcessNodeWebService(db)
 		webapp.job = SchedulerJobsWebService(db)
-		app = cherrypy.tree.mount(webapp, '/scheduler', self.conf)
+		app = cherrypy.tree.mount(webapp, '/', self.conf)
 		#self._setup_logging_(app.log, "rot_error_file", "logs/scheduler_error.log")
 		#self._setup_logging_(app.log, "rot_access_file", "logs/scheduler_access.log")
 		cherrypy.engine.start()

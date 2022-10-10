@@ -137,6 +137,10 @@ class SchedulerHandler(object):
 		return ret_str
 
 	@cherrypy.expose
+	def index(self):
+		return file('public/scheduler_index.html')
+
+	@cherrypy.expose
 	def api(self):
 		return self.show_api()
 
@@ -156,7 +160,7 @@ class SchedulerHandler(object):
 
 	@cherrypy.expose
 	def get_output_list(self, job_path=None, process_type=None):
-		rfile = open('public/get_output_list.html')
+		rfile = file('public/get_output_list.html')
 		retstr = rfile.read()
 		# default directory is output_old, but if it is matrix fit then use output.fit
 		img_path = os.path.join(job_path, 'output_old/*.png')
@@ -245,7 +249,7 @@ class SchedulerHandler(object):
 		encoded_string = ''
 		path = path.replace('..', '')
 		if self.check_path(path) == True:
-			with open(path, "rb") as image_file:
+			with file(path, "rb") as image_file:
 				encoded_string = base64.b64encode(image_file.read())
 			retstr = b'<img alt="My Image" src="data:image/png;base64,' + encoded_string + b'" />'
 			return retstr
